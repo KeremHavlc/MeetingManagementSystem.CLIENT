@@ -1,10 +1,9 @@
-import React from 'react';
 import Groups2Icon from '@mui/icons-material/Groups2';
 
 const Header = () => {
   return (
     <div className="flex justify-center select-none">
-      <div className="border-b border-gray-500 w-[1200px] h-[70px] flex justify-between items-center px-4">
+      <div className="border-b border-gray-500 w-[1100px] h-[70px] flex justify-between items-center px-4">
 
         {/* Sol Taraf */}
         <div className="flex items-center gap-2">

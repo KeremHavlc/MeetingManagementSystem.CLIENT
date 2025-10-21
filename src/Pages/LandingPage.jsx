@@ -1,10 +1,14 @@
+import FeaturesSection from '../Components/FeaturesSection'
 import Header from '../Components/Header'
+import HeroSection from '../Components/HeroSection'
 
 const LandingPage = () => {
   return (
-    <>
-        <Header/>
-    </>
+    <div className="flex flex-col items-center w-full">
+      <Header />
+      <HeroSection />   
+      <FeaturesSection/>
+    </div>
   )
 }
 
