@@ -1,6 +1,7 @@
 import Groups2Icon from '@mui/icons-material/Groups2';
 
 const Header = () => {
+  
   return (
     <div className="flex justify-center select-none">
       <div className="border-b border-gray-500 w-[1100px] h-[70px] flex justify-between items-center px-4">
@@ -18,11 +19,14 @@ const Header = () => {
 
         {/* Sağ Taraf */}
         <div className="flex items-center gap-4">
-          <button className="text-white text-lg transition-colors cursor-pointer duration-300 ease-in-out hover:text-[#e63946]">
+         <button
+            onClick={() => document.getElementById("features").scrollIntoView({ behavior: "smooth" })}
+            className="text-white text-lg font-semibold cursor-pointer hover:text-[#e63946] transition-colors"
+          >
             Özellikler
           </button>
 
-          <button className="text-white text-lg transition-colors cursor-pointer duration-300 ease-in-out hover:text-[#e63946]">
+          <button className="text-white text-lg font-semibold transition-colors cursor-pointer duration-300 ease-in-out hover:text-[#e63946]">
             Giriş Yap
           </button>
 
