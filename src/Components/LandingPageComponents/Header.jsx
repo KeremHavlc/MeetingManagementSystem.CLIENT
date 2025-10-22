@@ -1,11 +1,9 @@
-import Groups2Icon from '@mui/icons-material/Groups2';
+import Groups2Icon from "@mui/icons-material/Groups2";
 
-const Header = () => {
-  
+const Header = ({ onLoginClick, onRegisterClick }) => {
   return (
     <div className="flex justify-center select-none">
       <div className="border-b border-gray-500 w-[1100px] h-[70px] flex justify-between items-center px-4">
-
         {/* Sol Taraf */}
         <div className="flex items-center gap-2">
           <Groups2Icon
@@ -19,22 +17,31 @@ const Header = () => {
 
         {/* Sağ Taraf */}
         <div className="flex items-center gap-4">
-         <button
-            onClick={() => document.getElementById("features").scrollIntoView({ behavior: "smooth" })}
+          <button
+            onClick={() =>
+              document
+                .getElementById("features")
+                .scrollIntoView({ behavior: "smooth" })
+            }
             className="text-white text-lg font-semibold cursor-pointer hover:text-[#e63946] transition-colors"
           >
             Özellikler
           </button>
 
-          <button className="text-white text-lg font-semibold transition-colors cursor-pointer duration-300 ease-in-out hover:text-[#e63946]">
+          <button
+            onClick={onLoginClick}
+            className="text-white text-lg font-semibold transition-colors cursor-pointer duration-300 ease-in-out hover:text-[#e63946]"
+          >
             Giriş Yap
           </button>
 
-          <button className="w-[125px] h-[40px] rounded-3xl bg-[#e63946] cursor-pointer text-white text-lg font-semibold flex justify-center items-center transition-colors duration-300 ease-in-out hover:bg-[#b82e38]">
+          <button
+            onClick={onRegisterClick}
+            className="w-[125px] h-[40px] rounded-3xl bg-[#e63946] cursor-pointer text-white text-lg font-semibold flex justify-center items-center transition-colors duration-300 ease-in-out hover:bg-[#b82e38]"
+          >
             Üye Ol
           </button>
         </div>
-
       </div>
     </div>
   );

@@ -37,9 +37,9 @@ const Footer = () => {
       </div>
 
       {/* Alt Çizgi ve Telif Yazısı */}
-      <div className="w-full flex justify-center mt-8">
+      <div className="w-full flex justify-center mt-8 font-semibold">
         <p className="text-gray-500 text-xs">
-          © 2025 Toplantı Yönetim Sistemi. Tüm hakları saklıdır.
+          © 2025 Toplantı Yönetim Sistemi.
         </p>
       </div>
     </footer>

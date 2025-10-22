@@ -1,11 +1,11 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
-import meeting from '../Assets/team-collaboration.png';
-import SplitText from "../ReactBits/SplitText";
+import meeting from "../../Assets/team-collaboration.png";
+import SplitText from "../../ReactBits/SplitText";
 
-const HeroSection = () => {
+const HeroSection = ({ onRegisterClick }) => {
   const imageRef = useRef(null);
-  const textRef = useRef(null); 
+  const textRef = useRef(null);
 
   useEffect(() => {
     gsap.fromTo(
@@ -25,10 +25,8 @@ const HeroSection = () => {
     <>
       <div className="w-full flex justify-center mt-10 select-none">
         <div className="w-[1100px] flex justify-between items-center">
-
           {/* Sol Taraf - Metinler */}
           <div className="max-w-[450px]">
-
             {/* Başlık (SplitText ile animasyonlu) */}
             <SplitText
               text={"Toplantılarını Daha\nAkıllı Yönet"}
@@ -44,14 +42,17 @@ const HeroSection = () => {
             {/* Paragraf + Buton Topluca Soldan Gelsin */}
             <div ref={textRef}>
               <p className="text-gray-400 mt-4">
-                Toplantılarınızı planlayın, yönetin ve takip edin. Verimliliği artırın, zaman kazanın.
+                Toplantılarınızı planlayın, yönetin ve takip edin. Verimliliği
+                artırın, zaman kazanın.
               </p>
 
-              <button className="mt-6 bg-[#e63946] hover:bg-[#b82e38] cursor-pointer transition-colors px-6 py-3 rounded-lg font-semibold text-white">
+              <button
+                onClick={onRegisterClick}
+                className="mt-6 bg-[#e63946] hover:bg-[#b82e38] cursor-pointer transition-colors px-6 py-3 rounded-lg font-semibold text-white"
+              >
                 Ücretsiz Denemeye Başla
               </button>
             </div>
-
           </div>
 
           {/* Sağ Taraf - Animasyonlu Görsel */}
