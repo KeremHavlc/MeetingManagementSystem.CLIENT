@@ -4,6 +4,8 @@ import LandingPage from "./Pages/LandingPage";
 import HomePage from "./Pages/HomePage";
 import SideBar from "./Components/SideBar";
 import { ToastContainer } from "react-fox-toast";
+import MeetingsPage from "./Pages/MeetingsPage";
+import MeetingDetailsPage from "./Pages/MeetingDetailsPage";
 
 const AppWrapper = () => {
   const location = useLocation();
@@ -16,6 +18,8 @@ const AppWrapper = () => {
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/home" element={<HomePage />} />
+          <Route path="/meetings" element={<MeetingsPage />} />
+          <Route path="/meetings/:id" element={<MeetingDetailsPage />} />
         </Routes>
       </div>
 

@@ -7,10 +7,10 @@ const defaultTo = { opacity: 1, y: 0 };
 export default function SplitText({
   text = "",
   className = "",
-  delay = 90, 
-  duration = 0.6, 
+  delay = 90,
+  duration = 0.6,
   ease = "power3.out",
-  splitType = "chars", 
+  splitType = "chars",
   from = defaultFrom,
   to = defaultTo,
   threshold = 0.1,
@@ -23,7 +23,10 @@ export default function SplitText({
 
   const split = (str) => {
     if (splitType === "words") {
-      return str.split(" ").map((w, i) => ({ key: i, text: w + (i < str.split(" ").length - 1 ? " " : "") }));
+      return str.split(" ").map((w, i) => ({
+        key: i,
+        text: w + (i < str.split(" ").length - 1 ? " " : ""),
+      }));
     }
     return Array.from(str).map((ch, i) => ({ key: i, text: ch }));
   };
@@ -43,7 +46,7 @@ export default function SplitText({
               duration: duration,
               ease: ease,
               stagger: {
-                each: (delay / 1000),
+                each: delay / 1000,
               },
               onComplete: onLetterAnimationComplete,
             });
