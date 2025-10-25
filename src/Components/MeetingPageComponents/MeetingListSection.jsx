@@ -11,9 +11,8 @@ const MeetingListSection = ({ onSelectMeeting }) => {
     try {
       const token = localStorage.getItem("token");
       if (!token) return null;
-
       const payload = JSON.parse(atob(token.split(".")[1]));
-      return payload["Id"];
+      return payload["Id"] || payload["id"] || payload["nameid"];
     } catch {
       return null;
     }
@@ -26,14 +25,20 @@ const MeetingListSection = ({ onSelectMeeting }) => {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
+
       const response = await axios.post(
-        "https://localhost:7270/api/Meetings/GetMeetingByUserId",
+        "https://localhost:7270/api/MeetingParticipant/GetMeetingParticipantsByUserId",
         { userId },
         {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
-      setMeetings(response.data.data);
+
+      if (response.data.success) {
+        setMeetings(response.data.data);
+      }
     } catch (error) {
       console.error("Toplantılar alınamadı:", error);
     } finally {
@@ -68,11 +73,11 @@ const MeetingListSection = ({ onSelectMeeting }) => {
         </button>
       </div>
 
-      {/* Arama ve Filtre */}
+      {/* Arama */}
       <div className="flex gap-3 items-center mt-4">
         <input
           type="text"
-          placeholder="Toplantı konusu, katılımcı veya tarih ara..."
+          placeholder="Toplantı başlığı veya tarih ara..."
           className="w-full bg-[#1E1E1E] border border-[#2F2F2F] rounded-lg px-4 py-2 text-sm focus:outline-none"
         />
         <button className="bg-[#1E1E1E] px-4 py-2 border border-[#2F2F2F] rounded-lg hover:bg-[#2A2A2A] transition">

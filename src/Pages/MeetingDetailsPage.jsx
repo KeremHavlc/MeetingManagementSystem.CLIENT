@@ -1,101 +1,158 @@
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import * as signalR from "@microsoft/signalr";
+
 import AuthHeader from "../Components/AuthHeader";
 import ChatSection from "../Components/MeetingDetailsPageComponents/ChatSection";
 import Participants from "../Components/MeetingDetailsPageComponents/Participants";
 import AgendaSection from "../Components/MeetingDetailsPageComponents/AgendaSection";
-import DecisionModal from "../Components/MeetingDetailsPageComponents/DecisionModal";
 
-const MeetingDetailsPage = () => {
-  const [participants, setParticipants] = useState([
-    { id: 1, name: "Ayşe Yılmaz", role: "Proje Yöneticisi" },
-    { id: 2, name: "Ahmet Çelik", role: "Yazılım Geliştirici" },
-    { id: 3, name: "Fatma Kaya", role: "Tasarımcı" },
-  ]);
+// ✅ Token’dan UserId alma
+const getUserIdFromToken = () => {
+  const token = localStorage.getItem("token");
+  if (!token) return null;
+  const payload = JSON.parse(atob(token.split(".")[1]));
+  return payload["Id"] || payload["id"] || payload["nameid"];
+};
 
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      user: "Ayşe Yılmaz",
-      time: "14:05",
-      text: "Herkese merhaba, toplantıya hazır mıyız?",
-    },
-    { id: 2, user: "Sen", time: "14:06", text: "Hazırım, başlıyoruz!" },
-    { id: 3, user: "Ahmet Çelik", time: "14:07", text: "Sunumu paylaşıyorum." },
-  ]);
+// ✅ "kerem havlucu" → "Kerem Havlucu" çevir
+const formatName = (name) => {
+  if (!name) return "";
+  return name
+    .split(" ")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+    .join(" ");
+};
 
-  const [newMessage, setNewMessage] = useState("");
-  const [agendaProgress, setAgendaProgress] = useState(45);
-  const [agendaItems, setAgendaItems] = useState([
-    {
-      id: 1,
-      title: "Proje hedeflerinin gözden geçirilmesi",
-      decision: "Hedefler onaylandı.",
-      assignedTo: [],
-      status: "completed",
-    },
-    {
-      id: 2,
-      title: "Zaman çizelgesi ve kilometre taşları",
-      decision: "İlk kilometre taşı 2 hafta ertelendi.",
-      assignedTo: [],
-      status: "completed",
-    },
-    {
-      id: 3,
-      title: "Bütçe ve kaynak tahsisi",
-      decision: null,
-      assignedTo: [],
-      status: "pending",
-    },
-  ]);
-
-  const [showDecisionModal, setShowDecisionModal] = useState(false);
-  const [selectedAgendaItem, setSelectedAgendaItem] = useState(null);
-
-  const openDecisionModal = (item) => {
-    setSelectedAgendaItem(item);
-    setShowDecisionModal(true);
-  };
-
-  const saveDecisionToAgenda = (decisionText, selectedUsers) => {
-    if (!selectedAgendaItem) return;
-
-    const updated = agendaItems.map((item) =>
-      item.id === selectedAgendaItem.id
-        ? {
-            ...item,
-            decision: decisionText,
-            assignedTo: selectedUsers,
-            status: "completed",
-          }
-        : item
+// ✅ Backend’den userName/fullName alma
+const fetchUserName = async (userId) => {
+  try {
+    const token = localStorage.getItem("token");
+    const res = await fetch(
+      "https://localhost:7270/api/User/GetUserNameByUserId",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ userId }),
+      }
     );
 
-    setAgendaItems(updated);
+    const data = await res.json();
+    if (data.success && data.data) {
+      return formatName(data.data.fullName || data.data.userName);
+    }
+    return userId;
+  } catch (err) {
+    console.error("❌ Kullanıcı bilgisi alınamadı:", err);
+    return userId;
+  }
+};
 
-    const completedCount = updated.filter(
-      (i) => i.status === "completed"
-    ).length;
-    setAgendaProgress(Math.round((completedCount / updated.length) * 100));
+const MeetingDetailsPage = () => {
+  const { id: meetingId } = useParams();
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState("");
+  const [connection, setConnection] = useState(null);
 
-    setShowDecisionModal(false);
-    setSelectedAgendaItem(null);
-  };
+  const currentUserId = getUserIdFromToken();
 
-  const sendMessage = () => {
+  // ✅ 1) Eski mesajları yükle & username’e çevir
+  useEffect(() => {
+    const loadMessages = async () => {
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(
+        `https://localhost:7270/api/ChatMessages/by-meeting?meetingId=${meetingId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      const data = await res.json();
+
+      const mapped = await Promise.all(
+        data.map(async (msg) => {
+          let user =
+            msg.senderId === currentUserId
+              ? "Sen"
+              : await fetchUserName(msg.senderId);
+
+          return {
+            id: msg.id,
+            user: user,
+            text: msg.message,
+            time: new Date(msg.createdAt).toLocaleTimeString("tr-TR", {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+          };
+        })
+      );
+
+      setMessages(mapped);
+    };
+
+    if (meetingId) loadMessages();
+  }, [meetingId]);
+
+  // ✅ 2) SignalR bağlantısı & anlık mesaj alma
+  useEffect(() => {
+    if (!meetingId) return;
+
+    const connect = new signalR.HubConnectionBuilder()
+      .withUrl("https://localhost:7270/chatHub", {
+        accessTokenFactory: () => localStorage.getItem("token") || "",
+      })
+      .withAutomaticReconnect()
+      .build();
+
+    connect.start().then(() => {
+      console.log("✅ SignalR bağlantı kuruldu");
+      connect.invoke("JoinMeetingGroup", meetingId);
+    });
+
+    connect.on("ReceiveMessage", async (msg) => {
+      let user =
+        msg.senderId === currentUserId
+          ? "Sen"
+          : await fetchUserName(msg.senderId);
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: msg.id,
+          user: user,
+          text: msg.message,
+          time: new Date(msg.createdAt).toLocaleTimeString("tr-TR", {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+        },
+      ]);
+    });
+
+    setConnection(connect);
+    return () => connect.off("ReceiveMessage");
+  }, [meetingId]);
+
+  // ✅ 3) Mesaj gönder
+  const sendMessage = async () => {
     if (!newMessage.trim()) return;
-    setMessages([
-      ...messages,
-      {
-        id: Date.now(),
-        user: "Sen",
-        time: new Date().toLocaleTimeString("tr-TR", {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-        text: newMessage,
-      },
-    ]);
+    if (
+      !connection ||
+      connection.state !== signalR.HubConnectionState.Connected
+    ) {
+      console.warn("⚠ SignalR bağlı değil!");
+      return;
+    }
+
+    await connection.invoke(
+      "SendMessage",
+      meetingId,
+      currentUserId,
+      newMessage
+    );
     setNewMessage("");
   };
 
@@ -104,11 +161,8 @@ const MeetingDetailsPage = () => {
       <AuthHeader />
 
       <div className="w-[1100px] mx-auto mt-4">
-        {/* Başlık */}
-        <div className="mb-8 pb-6 border-b border-[#2F2F2F]">
-          <h1 className="text-3xl font-bold">Proje Lansman Toplantısı</h1>
-          <p className="text-gray-400">24 Ekim 2024, 14:00 | Online</p>
-        </div>
+        <h1 className="text-3xl font-bold mb-2">Toplantı Detay</h1>
+        <p className="text-gray-400 mb-8">Meeting ID: {meetingId}</p>
 
         <div className="flex gap-6">
           <ChatSection
@@ -117,27 +171,12 @@ const MeetingDetailsPage = () => {
             setNewMessage={setNewMessage}
             sendMessage={sendMessage}
           />
-
           <div className="w-1/3 space-y-6">
-            <Participants participants={participants} />
-
-            <AgendaSection
-              agendaItems={agendaItems}
-              agendaProgress={agendaProgress}
-              openDecisionModal={openDecisionModal}
-            />
+            <Participants participants={[]} />
+            <AgendaSection agendaItems={[]} agendaProgress={0} />
           </div>
         </div>
       </div>
-
-      {showDecisionModal && (
-        <DecisionModal
-          closeModal={() => setShowDecisionModal(false)}
-          selectedAgendaItem={selectedAgendaItem}
-          participants={participants}
-          saveDecisionToAgenda={saveDecisionToAgenda}
-        />
-      )}
     </div>
   );
 };

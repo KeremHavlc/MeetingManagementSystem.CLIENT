@@ -25,7 +25,7 @@ const ChatSection = ({ messages, newMessage, setNewMessage, sendMessage }) => {
                 } rounded-xl p-4`}
               >
                 {msg.user !== "Sen" && (
-                  <p className="font-medium text-sm mb-1">{msg.user}</p>
+                  <p className="font-bold text-sm mb-1">{msg.user}</p>
                 )}
                 <p className="text-sm mb-1">{msg.text}</p>
                 <p className="text-xs text-gray-400">{msg.time}</p>
