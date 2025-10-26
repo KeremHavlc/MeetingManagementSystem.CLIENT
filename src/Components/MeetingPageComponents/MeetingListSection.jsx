@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import CreateMeetingModal from "./CreateMeetingModal";
+import { useNavigate } from "react-router-dom";
 
-const MeetingListSection = ({ onSelectMeeting }) => {
+const MeetingListSection = ({ onMeetingsLoaded }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [meetings, setMeetings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("upcoming");
+  const navigate = useNavigate();
 
   const getUserIdFromToken = () => {
     try {
@@ -25,19 +28,20 @@ const MeetingListSection = ({ onSelectMeeting }) => {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
-
       const response = await axios.post(
         "https://localhost:7270/api/MeetingParticipant/GetMeetingParticipantsByUserId",
         { userId },
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 
       if (response.data.success) {
         setMeetings(response.data.data);
+
+        if (onMeetingsLoaded) {
+          onMeetingsLoaded(response.data.data);
+        }
       }
     } catch (error) {
       console.error("Toplantılar alınamadı:", error);
@@ -50,9 +54,14 @@ const MeetingListSection = ({ onSelectMeeting }) => {
     fetchMeetings();
   }, []);
 
+  const filteredMeetings = meetings.filter((meeting) => {
+    const now = new Date();
+    const scheduled = new Date(meeting.scheduledAt);
+    return activeTab === "upcoming" ? scheduled > now : scheduled <= now;
+  });
+
   return (
     <div className="flex-1">
-      {/* Üst Bar */}
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-3xl font-semibold">Toplantılarım</h2>
         <button
@@ -65,37 +74,42 @@ const MeetingListSection = ({ onSelectMeeting }) => {
 
       {/* Sekmeler */}
       <div className="flex gap-6 border-b border-[#2F2F2F] pb-2">
-        <button className="text-[#e63946] font-medium border-b-2 border-[#e63946] pb-2">
+        <button
+          onClick={() => setActiveTab("upcoming")}
+          className={`pb-2 ${
+            activeTab === "upcoming"
+              ? "text-[#e63946] font-medium border-b-2 border-[#e63946]"
+              : "text-gray-400 hover:text-[#e63946]"
+          }`}
+        >
           Yaklaşan
         </button>
-        <button className="text-gray-400 hover:text-[#e63946] transition">
+
+        <button
+          onClick={() => setActiveTab("past")}
+          className={`pb-2 ${
+            activeTab === "past"
+              ? "text-[#e63946] font-medium border-b-2 border-[#e63946]"
+              : "text-gray-400 hover:text-[#e63946]"
+          }`}
+        >
           Geçmiş
         </button>
       </div>
 
-      {/* Arama */}
-      <div className="flex gap-3 items-center mt-4">
-        <input
-          type="text"
-          placeholder="Toplantı başlığı veya tarih ara..."
-          className="w-full bg-[#1E1E1E] border border-[#2F2F2F] rounded-lg px-4 py-2 text-sm focus:outline-none"
-        />
-        <button className="bg-[#1E1E1E] px-4 py-2 border border-[#2F2F2F] rounded-lg hover:bg-[#2A2A2A] transition">
-          Filtrele
-        </button>
-      </div>
-
-      {/* Toplantı Kartları */}
-      <div className="mt-6 flex flex-col gap-4">
+      {/* Toplantılar */}
+      <div className="mt-6 flex flex-col gap-4 text-xl font-semibold ">
         {loading ? (
           <p className="text-gray-400">⏳ Toplantılar yükleniyor...</p>
-        ) : meetings.length === 0 ? (
-          <p className="text-gray-500 text-sm">Hiç toplantı bulunamadı.</p>
+        ) : filteredMeetings.length === 0 ? (
+          <p className="text-gray-500 text-xl font-semibold">
+            Bu kategoride toplantı yok.
+          </p>
         ) : (
-          meetings.map((meeting) => (
+          filteredMeetings.map((meeting) => (
             <div
               key={meeting.id}
-              onClick={() => onSelectMeeting(meeting)}
+              onClick={() => navigate(`/meetings/${meeting.id}`)}
               className="cursor-pointer bg-[#1A1A1A] p-4 rounded-lg border border-[#2A2A2A] flex justify-between hover:bg-[#232323] transition"
             >
               <div>
@@ -113,16 +127,11 @@ const MeetingListSection = ({ onSelectMeeting }) => {
                   })}
                 </p>
               </div>
-
-              <button className="text-sm px-3 py-1 bg-[#e63946] rounded-lg hover:bg-[#b82e38] transition">
-                Detaylar
-              </button>
             </div>
           ))
         )}
       </div>
 
-      {/* Modal */}
       {isModalOpen && (
         <CreateMeetingModal
           onClose={() => {

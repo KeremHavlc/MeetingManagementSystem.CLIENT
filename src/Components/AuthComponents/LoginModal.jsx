@@ -1,14 +1,18 @@
 import { useState } from "react";
 import api from "../../Api/AxiosClient";
 import { toast } from "react-fox-toast";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const LoginModal = ({ onClose }) => {
   const [userNameOrEmail, setUserNameOrEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const handlesubmit = async (e) => {
+  const params = new URLSearchParams(location.search);
+  const redirectUrl = params.get("redirect") || "/home";
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
@@ -18,17 +22,15 @@ const LoginModal = ({ onClose }) => {
       });
 
       if (!response.data?.success) {
-        toast.error(response.data?.message || "Giriş başarısız!");
+        toast.error("Giriş başarısız!");
         return;
       }
 
       localStorage.setItem("token", response.data.data);
-
       toast.success("Giriş başarılı!");
 
       onClose();
-
-      navigate("/home");
+      navigate(redirectUrl, { replace: true });
     } catch (error) {
       console.error("Login Error:", error);
       toast.error("Sunucuya bağlanılamadı!");
@@ -55,7 +57,7 @@ const LoginModal = ({ onClose }) => {
           Giriş Yap
         </h2>
 
-        <form className="flex flex-col gap-4" onSubmit={handlesubmit}>
+        <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
           <input
             type="text"
             placeholder="E-posta veya Kullanıcı Adı"

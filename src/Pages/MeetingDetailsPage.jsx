@@ -7,7 +7,6 @@ import ChatSection from "../Components/MeetingDetailsPageComponents/ChatSection"
 import Participants from "../Components/MeetingDetailsPageComponents/Participants";
 import AgendaSection from "../Components/MeetingDetailsPageComponents/AgendaSection";
 
-// ✅ Token’dan UserId alma
 const getUserIdFromToken = () => {
   const token = localStorage.getItem("token");
   if (!token) return null;
@@ -15,7 +14,6 @@ const getUserIdFromToken = () => {
   return payload["Id"] || payload["id"] || payload["nameid"];
 };
 
-// ✅ "kerem havlucu" → "Kerem Havlucu" çevir
 const formatName = (name) => {
   if (!name) return "";
   return name
@@ -24,7 +22,6 @@ const formatName = (name) => {
     .join(" ");
 };
 
-// ✅ Backend’den userName/fullName alma
 const fetchUserName = async (userId) => {
   try {
     const token = localStorage.getItem("token");
@@ -45,42 +42,67 @@ const fetchUserName = async (userId) => {
       return formatName(data.data.fullName || data.data.userName);
     }
     return userId;
-  } catch (err) {
-    console.error("❌ Kullanıcı bilgisi alınamadı:", err);
+  } catch {
     return userId;
   }
 };
 
 const MeetingDetailsPage = () => {
   const { id: meetingId } = useParams();
+  const [meetingDetails, setMeetingDetails] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [connection, setConnection] = useState(null);
 
   const currentUserId = getUserIdFromToken();
 
-  // ✅ 1) Eski mesajları yükle & username’e çevir
   useEffect(() => {
-    const loadMessages = async () => {
-      const token = localStorage.getItem("token");
+    if (!meetingId) return;
 
+    const fetchMeetingDetails = async () => {
+      const token = localStorage.getItem("token");
+      const res = await fetch(
+        "https://localhost:7270/api/Meetings/GetMeetingById",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ meetingId }),
+        }
+      );
+
+      const result = await res.json();
+      if (result.success) {
+        setMeetingDetails(result.data);
+      }
+    };
+
+    fetchMeetingDetails();
+  }, [meetingId]);
+
+  useEffect(() => {
+    if (!meetingId) return;
+    const token = localStorage.getItem("token");
+
+    const loadMessages = async () => {
       const res = await fetch(
         `https://localhost:7270/api/ChatMessages/by-meeting?meetingId=${meetingId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
       const data = await res.json();
 
       const mapped = await Promise.all(
         data.map(async (msg) => {
-          let user =
+          const user =
             msg.senderId === currentUserId
               ? "Sen"
               : await fetchUserName(msg.senderId);
 
           return {
             id: msg.id,
-            user: user,
+            user,
             text: msg.message,
             time: new Date(msg.createdAt).toLocaleTimeString("tr-TR", {
               hour: "2-digit",
@@ -93,10 +115,9 @@ const MeetingDetailsPage = () => {
       setMessages(mapped);
     };
 
-    if (meetingId) loadMessages();
+    loadMessages();
   }, [meetingId]);
 
-  // ✅ 2) SignalR bağlantısı & anlık mesaj alma
   useEffect(() => {
     if (!meetingId) return;
 
@@ -113,7 +134,7 @@ const MeetingDetailsPage = () => {
     });
 
     connect.on("ReceiveMessage", async (msg) => {
-      let user =
+      const user =
         msg.senderId === currentUserId
           ? "Sen"
           : await fetchUserName(msg.senderId);
@@ -122,7 +143,7 @@ const MeetingDetailsPage = () => {
         ...prev,
         {
           id: msg.id,
-          user: user,
+          user,
           text: msg.message,
           time: new Date(msg.createdAt).toLocaleTimeString("tr-TR", {
             hour: "2-digit",
@@ -136,16 +157,13 @@ const MeetingDetailsPage = () => {
     return () => connect.off("ReceiveMessage");
   }, [meetingId]);
 
-  // ✅ 3) Mesaj gönder
   const sendMessage = async () => {
     if (!newMessage.trim()) return;
     if (
       !connection ||
       connection.state !== signalR.HubConnectionState.Connected
-    ) {
-      console.warn("⚠ SignalR bağlı değil!");
+    )
       return;
-    }
 
     await connection.invoke(
       "SendMessage",
@@ -157,12 +175,22 @@ const MeetingDetailsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#121212] text-white">
+    <div className="min-h-screen bg-[#121212] text-white select-none">
       <AuthHeader />
-
       <div className="w-[1100px] mx-auto mt-4">
-        <h1 className="text-3xl font-bold mb-2">Toplantı Detay</h1>
-        <p className="text-gray-400 mb-8">Meeting ID: {meetingId}</p>
+        <h1 className="text-3xl mb-2 font-semibold">
+          {meetingDetails ? meetingDetails.title : "Toplantı Detay"}
+        </h1>
+
+        <p className="text-gray-400 mb-2 font-semibold">
+          {meetingDetails &&
+            new Date(meetingDetails.scheduledAt).toLocaleString("tr-TR", {
+              dateStyle: "full",
+              timeStyle: "short",
+            })}
+        </p>
+
+        <p className="text-gray-500 mb-8"></p>
 
         <div className="flex gap-6">
           <ChatSection

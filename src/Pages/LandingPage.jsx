@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import Header from "../Components/LandingPageComponents/Header";
 import HeroSection from "../Components/LandingPageComponents/HeroSection";
 import WhyUsSection from "../Components/LandingPageComponents/WhyUsSection";
@@ -10,6 +11,15 @@ import RegisterModal from "../Components/AuthComponents/RegisterModal";
 const LandingPage = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get("redirect")) {
+      setIsLoginOpen(true);
+    }
+  }, [location]);
+
   return (
     <div className="flex flex-col items-center w-full">
       <Header
@@ -31,7 +41,7 @@ const LandingPage = () => {
       <WhyUsSection />
       <FeaturesSection />
       <Footer />
-      {/* Modallar */}
+
       {isLoginOpen && <LoginModal onClose={() => setIsLoginOpen(false)} />}
       {isRegisterOpen && (
         <RegisterModal onClose={() => setIsRegisterOpen(false)} />
