@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "react-fox-toast";
-import InviteLinkGenerator from "./InviteLinkGenerator.JSX";
+import InviteLinkGenerator from "./InviteLinkGenerator";
 
 const AddParticipantModal = ({ closeModal, onGenerateLink }) => {
   const [emailOrUsername, setEmailOrUsername] = useState("");
