@@ -1,13 +1,27 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 
 const ChatSection = ({ messages, newMessage, setNewMessage, sendMessage }) => {
+  const messagesEndRef = useRef(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    if (messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage.user === "Sen") {
+        scrollToBottom();
+      }
+    }
+  }, [messages]);
+
   return (
     <div className="w-2/3">
-      <div className="bg-[#1E1E1E] border border-[#2F2F2F] rounded-xl p-6 h-full flex flex-col">
+      <div className="bg-[#1E1E1E] border border-[#2F2F2F] rounded-xl p-6 flex flex-col h-[600px]">
         <h2 className="text-xl font-semibold mb-4 text-white">Sohbet</h2>
 
-        {/* Mesajlar */}
-        <div className="flex-1 space-y-4 mb-6 max-h-[700px] overflow-y-auto">
+        <div className="flex-1 space-y-4 mb-6 h-[450px] overflow-y-auto pr-2">
           {messages.map((msg) => (
             <div
               key={msg.id}
@@ -32,9 +46,10 @@ const ChatSection = ({ messages, newMessage, setNewMessage, sendMessage }) => {
               </div>
             </div>
           ))}
+
+          <div ref={messagesEndRef} />
         </div>
 
-        {/* Mesaj Yazma */}
         <div className="border-t border-[#2F2F2F] pt-4">
           <div className="flex gap-2">
             <input

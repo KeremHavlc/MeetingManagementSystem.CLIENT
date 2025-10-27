@@ -1,12 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "react-fox-toast";
+import InviteLinkGenerator from "./InviteLinkGenerator.JSX";
 
 const AddParticipantModal = ({ closeModal, onGenerateLink }) => {
   const [emailOrUsername, setEmailOrUsername] = useState("");
-  const [inviteLink, setInviteLink] = useState("");
   const [loading, setLoading] = useState(false);
-  const [linkLoading, setLinkLoading] = useState(false);
   const inputRef = useRef(null);
 
   const { id: meetingId } = useParams();
@@ -18,6 +17,7 @@ const AddParticipantModal = ({ closeModal, onGenerateLink }) => {
       if (e.key === "Escape") closeModal();
       if (e.key === "Enter") handleAdd();
     };
+
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
@@ -53,9 +53,7 @@ const AddParticipantModal = ({ closeModal, onGenerateLink }) => {
       );
 
       if (!userRes.ok) {
-        const txt = await userRes.text().catch(() => "");
         toast.error("Kullanıcı bulunamadı veya sunucu hatası.");
-        console.error("GetUserId error:", userRes.status, txt);
         setLoading(false);
         return;
       }
@@ -70,12 +68,6 @@ const AddParticipantModal = ({ closeModal, onGenerateLink }) => {
       const userId =
         userJson.data.userId || userJson.data.id || userJson.data.user?.id;
 
-      if (!userId) {
-        toast.error("Kullanıcı ID bulunamadı.");
-        setLoading(false);
-        return;
-      }
-
       const joinRes = await fetch(
         "https://localhost:7270/api/MeetingParticipant/JoinFromInvite",
         {
@@ -89,62 +81,17 @@ const AddParticipantModal = ({ closeModal, onGenerateLink }) => {
       );
 
       const joinJson = await joinRes.json().catch(() => null);
-      if (!joinRes.ok || !joinJson) {
-        toast.error("Toplantıya eklenemedi (sunucu hatası).");
-        console.error("JoinFromInvite error:", joinRes.status, joinJson);
-        setLoading(false);
-        return;
-      }
-
-      if (joinJson.success) {
+      if (joinJson?.success) {
         toast.success("Kullanıcı toplantıya eklendi.");
         closeModal();
       } else {
-        toast.error(joinJson.message || "Toplantıya eklenemedi.");
+        toast.error(joinJson?.message || "Toplantıya eklenemedi.");
       }
     } catch (err) {
       console.error("handleAdd error:", err);
       toast.error("İşlem sırasında hata oluştu.");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleCreateLink = async () => {
-    if (!meetingId) {
-      toast.error("Toplantı ID bulunamadı.");
-      return;
-    }
-    if (!onGenerateLink) {
-      toast.error("Link oluşturma fonksiyonu mevcut değil.");
-      return;
-    }
-
-    setLinkLoading(true);
-    try {
-      const token = await onGenerateLink();
-
-      let link = token;
-      if (token && !/^https?:\/\//i.test(token)) {
-        link = `${window.location.origin}/invite/${token}`;
-      }
-      setInviteLink(link);
-      toast.success("Davet linki oluşturuldu.");
-    } catch (err) {
-      console.error("createLink error:", err);
-      toast.error("Davet linki oluşturulamadı.");
-    } finally {
-      setLinkLoading(false);
-    }
-  };
-
-  const copyInvite = async () => {
-    if (!inviteLink) return;
-    try {
-      await navigator.clipboard.writeText(inviteLink);
-      toast.success("Link kopyalandı.");
-    } catch {
-      toast.error("Kopyalama başarısız.");
     }
   };
 
@@ -158,11 +105,9 @@ const AddParticipantModal = ({ closeModal, onGenerateLink }) => {
         onClick={(e) => e.stopPropagation()}
         className="bg-[#1e1e1e] w-[420px] p-6 rounded-2xl shadow-xl relative border border-gray-700"
       >
-        {/* Close */}
         <button
           onClick={closeModal}
           className="absolute top-3 right-3 text-gray-400 hover:text-white transition"
-          aria-label="Kapat"
         >
           ✕
         </button>
@@ -192,29 +137,10 @@ const AddParticipantModal = ({ closeModal, onGenerateLink }) => {
           {loading ? "Ekleniyor..." : "➕ Katılımcı Ekle"}
         </button>
 
-        <button
-          onClick={handleCreateLink}
-          disabled={linkLoading}
-          className={`w-full mt-3 py-2 rounded-lg text-white transition ${
-            linkLoading ? "bg-[#555] cursor-wait" : "bg-[#444] hover:bg-[#555]"
-          }`}
-        >
-          {linkLoading ? "Link Oluşturuluyor..." : "🎟 Davet Linki Oluştur"}
-        </button>
-
-        {inviteLink && (
-          <div className="mt-3 flex items-center gap-2">
-            <p className="text-gray-300 text-sm break-all flex-1">
-              {inviteLink}
-            </p>
-            <button
-              onClick={copyInvite}
-              className="px-3 py-1 bg-[#2b2b2b] rounded text-gray-300 hover:text-white"
-            >
-              Kopyala
-            </button>
-          </div>
-        )}
+        <InviteLinkGenerator
+          meetingId={meetingId}
+          onGenerateLink={onGenerateLink}
+        />
       </div>
     </div>
   );

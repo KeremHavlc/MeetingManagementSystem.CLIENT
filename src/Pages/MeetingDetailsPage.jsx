@@ -1,11 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import * as signalR from "@microsoft/signalr";
 
 import AuthHeader from "../Components/AuthHeader";
 import ChatSection from "../Components/MeetingDetailsPageComponents/ChatSection";
-import Participants from "../Components/MeetingDetailsPageComponents/Participants";
 import AgendaSection from "../Components/MeetingDetailsPageComponents/AgendaSection";
+import ParticipantsToggle from "../Components/MeetingDetailsPageComponents/ParticipantsToggle";
+import Participants from "../Components/MeetingDetailsPageComponents/Participants";
+import OpenAssignmentModal from "../Components/MeetingDetailsPageComponents/OpenAssignmentModal";
+import OpenDecisionModal from "../Components/MeetingDetailsPageComponents/OpenDecisionModal";
 
 const getUserIdFromToken = () => {
   const token = localStorage.getItem("token");
@@ -36,7 +39,6 @@ const fetchUserName = async (userId) => {
         body: JSON.stringify({ userId }),
       }
     );
-
     const data = await res.json();
     if (data.success && data.data) {
       return formatName(data.data.fullName || data.data.userName);
@@ -49,16 +51,25 @@ const fetchUserName = async (userId) => {
 
 const MeetingDetailsPage = () => {
   const { id: meetingId } = useParams();
+
   const [meetingDetails, setMeetingDetails] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [connection, setConnection] = useState(null);
+  const [showParticipantsPanel, setShowParticipantsPanel] = useState(false);
+
+  const [agendaItems, setAgendaItems] = useState([]);
+  const [agendaProgress, setAgendaProgress] = useState(0);
+
+  const [isDecisionOpen, setIsDecisionOpen] = useState(false);
+  const [isAssignmentOpen, setIsAssignmentOpen] = useState(false);
+  const [selectedDecision, setSelectedDecision] = useState(null);
 
   const currentUserId = getUserIdFromToken();
+  const agendaRef = useRef();
 
   useEffect(() => {
     if (!meetingId) return;
-
     const fetchMeetingDetails = async () => {
       const token = localStorage.getItem("token");
       const res = await fetch(
@@ -72,13 +83,9 @@ const MeetingDetailsPage = () => {
           body: JSON.stringify({ meetingId }),
         }
       );
-
       const result = await res.json();
-      if (result.success) {
-        setMeetingDetails(result.data);
-      }
+      if (result.success) setMeetingDetails(result.data);
     };
-
     fetchMeetingDetails();
   }, [meetingId]);
 
@@ -129,7 +136,6 @@ const MeetingDetailsPage = () => {
       .build();
 
     connect.start().then(() => {
-      console.log("✅ SignalR bağlantı kuruldu");
       connect.invoke("JoinMeetingGroup", meetingId);
     });
 
@@ -174,37 +180,88 @@ const MeetingDetailsPage = () => {
     setNewMessage("");
   };
 
+  const openDecisionModal = () => {
+    setIsDecisionOpen(true);
+  };
+  const closeDecisionModal = () => {
+    setIsDecisionOpen(false);
+    agendaRef.current?.fetchDecisions();
+  };
+
+  const openAssignmentModal = (decision) => {
+    setSelectedDecision(decision);
+    setIsAssignmentOpen(true);
+  };
+  const closeAssignmentModal = () => {
+    setIsAssignmentOpen(false);
+    setSelectedDecision(null);
+    agendaRef.current?.fetchDecisions();
+  };
+
   return (
     <div className="min-h-screen bg-[#121212] text-white select-none">
       <AuthHeader />
+
       <div className="w-[1100px] mx-auto mt-4">
-        <h1 className="text-3xl mb-2 font-semibold">
-          {meetingDetails ? meetingDetails.title : "Toplantı Detay"}
-        </h1>
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl mb-2 font-semibold">
+              {meetingDetails ? meetingDetails.title : "Toplantı Detay"}
+            </h1>
+            <p className="text-gray-400 font-semibold mt-6">
+              {meetingDetails &&
+                new Date(meetingDetails.scheduledAt).toLocaleString("tr-TR", {
+                  dateStyle: "full",
+                  timeStyle: "short",
+                })}
+            </p>
+          </div>
 
-        <p className="text-gray-400 mb-2 font-semibold">
-          {meetingDetails &&
-            new Date(meetingDetails.scheduledAt).toLocaleString("tr-TR", {
-              dateStyle: "full",
-              timeStyle: "short",
-            })}
-        </p>
+          <div className="flex items-center gap-3">
+            <ParticipantsToggle
+              onToggle={() => setShowParticipantsPanel((prev) => !prev)}
+            />
+          </div>
+        </div>
 
-        <p className="text-gray-500 mb-8"></p>
-
-        <div className="flex gap-6">
+        <div className="flex gap-6 mt-6">
           <ChatSection
             messages={messages}
             newMessage={newMessage}
             setNewMessage={setNewMessage}
             sendMessage={sendMessage}
           />
-          <div className="w-1/3 space-y-6">
-            <Participants participants={[]} />
-            <AgendaSection agendaItems={[]} agendaProgress={0} />
+
+          <div className="w-[400px] space-y-4">
+            {showParticipantsPanel && (
+              <div className="bg-[#1E1E1E] border border-[#2F2F2F] rounded-xl p-4">
+                <Participants />
+              </div>
+            )}
+
+            <AgendaSection
+              ref={agendaRef}
+              agendaItems={agendaItems}
+              agendaProgress={agendaProgress}
+              openDecisionModal={openDecisionModal}
+              openAssignmentModal={openAssignmentModal}
+            />
           </div>
         </div>
       </div>
+
+      <OpenDecisionModal
+        isOpen={isDecisionOpen}
+        onClose={closeDecisionModal}
+        meetingId={meetingId}
+      />
+
+      <OpenAssignmentModal
+        isOpen={isAssignmentOpen}
+        onClose={closeAssignmentModal}
+        meetingId={meetingId}
+        decision={selectedDecision}
+      />
     </div>
   );
 };

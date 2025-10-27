@@ -6,7 +6,8 @@ const MeetingDetailPanel = ({ meeting }) => {
   if (!meeting) return null;
 
   return (
-    <div className="w-[350px] h-[300px] bg-[#1A1A1A] rounded-xl p-5 border border-[#2F2F2F] overflow-y-auto relative">
+    <div className="w-[350px] h-[400px] bg-[#1A1A1A] rounded-xl p-5 border border-[#2F2F2F] relative flex flex-col">
+      {/* Üst Başlık */}
       <div className="flex items-center gap-2">
         <h3 className="text-xl font-semibold">{meeting.title}</h3>
         <span className="text-[#e63946] animate-blink text-xl">⚠</span>
@@ -20,16 +21,18 @@ const MeetingDetailPanel = ({ meeting }) => {
         })}
       </p>
 
-      <div className="mt-5">
+      <div className="mt-4 overflow-y-auto pr-1 flex-1">
         <h4 className="text-md font-medium">📌 Gündem</h4>
         {meeting.description ? (
-          <p className="text-sm text-gray-300 mt-2">{meeting.description}</p>
+          <p className="text-sm text-gray-300 mt-2 leading-relaxed">
+            {meeting.description}
+          </p>
         ) : (
           <p className="text-sm text-gray-500 mt-2">Açıklama girilmemiş.</p>
         )}
       </div>
 
-      <div className="absolute bottom-4 left-5 right-5">
+      <div className="mt-4">
         <button
           onClick={() => navigate(`/meetings/${meeting.id}`)}
           className="w-full bg-[#e63946] hover:bg-[#b82e38] transition py-2 rounded-lg text-white font-medium"
