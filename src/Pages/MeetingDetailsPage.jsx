@@ -243,6 +243,7 @@ const MeetingDetailsPage = () => {
               ref={agendaRef}
               agendaItems={agendaItems}
               agendaProgress={agendaProgress}
+              setAgendaProgress={setAgendaProgress}
               openDecisionModal={openDecisionModal}
               openAssignmentModal={openAssignmentModal}
             />
@@ -254,6 +255,7 @@ const MeetingDetailsPage = () => {
         isOpen={isDecisionOpen}
         onClose={closeDecisionModal}
         meetingId={meetingId}
+        onAdded={() => agendaRef.current?.fetchDecisions()}
       />
 
       <OpenAssignmentModal

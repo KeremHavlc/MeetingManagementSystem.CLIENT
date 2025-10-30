@@ -9,7 +9,13 @@ import { useParams } from "react-router-dom";
 
 const AgendaSection = forwardRef(
   (
-    { agendaItems, agendaProgress, openDecisionModal, openAssignmentModal },
+    {
+      agendaItems,
+      agendaProgress,
+      setAgendaProgress,
+      openDecisionModal,
+      openAssignmentModal,
+    },
     ref
   ) => {
     const { id: meetingId } = useParams();
@@ -54,20 +60,43 @@ const AgendaSection = forwardRef(
       }
     };
 
+    const fetchProgress = async () => {
+      if (!meetingId) return;
+      try {
+        const token = localStorage.getItem("token");
+        const res = await axios.post(
+          "https://localhost:7270/api/DecisionAssignment/GetMeetingDecisionProgress",
+          { meetingId },
+          {
+            headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+          }
+        );
+
+        if (res.data?.success) {
+          setAgendaProgress(res.data.data.completionRate);
+        }
+      } catch (error) {
+        console.error("İlerleme alınırken hata:", error);
+      }
+    };
+
     useImperativeHandle(ref, () => ({
       fetchDecisions,
+      fetchProgress,
     }));
 
     useEffect(() => {
       fetchDecisions();
+      fetchProgress();
     }, [meetingId]);
 
     return (
       <div className="bg-[#1E1E1E] border border-[#2F2F2F] rounded-xl p-5 h-[600px]">
         <h2 className="text-lg font-semibold text-white mb-4">
-          Gündem Maddeleri & Kararlar
+          Toplantı Kararları ve İlerleme Durumu
         </h2>
 
+        {/* 🔹 Gündem maddeleri */}
         <div className="space-y-4 max-h-[540px] overflow-y-auto pr-2">
           {agendaItems?.length > 0 ? (
             agendaItems.map((item, index) => (
@@ -103,10 +132,11 @@ const AgendaSection = forwardRef(
               </div>
             ))
           ) : (
-            <p className="text-xs text-gray-400">Gündem maddesi bulunamadı.</p>
+            <p className="text-xs text-gray-400"> </p>
           )}
         </div>
 
+        {/* 🔹 Progress bar */}
         {typeof agendaProgress === "number" && (
           <div className="mt-4">
             <div className="w-full bg-gray-700 h-2 rounded-full">
@@ -120,6 +150,8 @@ const AgendaSection = forwardRef(
             </p>
           </div>
         )}
+
+        {/* 🔹 Kararlar listesi */}
         <div className="mt-6">
           <div className="flex items-center justify-between">
             <h3 className="text-base font-semibold text-white">
@@ -135,7 +167,10 @@ const AgendaSection = forwardRef(
               </button>
 
               <button
-                onClick={fetchDecisions}
+                onClick={() => {
+                  fetchDecisions();
+                  fetchProgress();
+                }}
                 className="text-xs px-3 py-1 rounded-lg bg-[#2F2F2F] hover:bg-[#3a3a3a] text-gray-200 transition"
               >
                 Yenile
@@ -143,6 +178,7 @@ const AgendaSection = forwardRef(
             </div>
           </div>
 
+          {/* 🔹 Kararlar listesi */}
           <div className="space-y-3 mt-3 max-h-[380px] overflow-y-auto pr-2">
             {loadingDecisions && (
               <p className="text-xs text-gray-400">Yükleniyor...</p>
