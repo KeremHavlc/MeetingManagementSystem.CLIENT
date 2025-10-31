@@ -70,12 +70,15 @@ const AuthHeader = () => {
           {/* Açılır Menü */}
           {isMenuOpen && (
             <div className="absolute right-0 mt-2 w-48 bg-[#1f1f1f] border border-[#333] rounded-lg shadow-lg overflow-hidden">
-              <button className="w-full text-left px-4 py-2 flex items-center gap-2 hover:bg-[#2a2a2a] text-white">
+              <button
+                onClick={() => navigate("/profile")}
+                className="w-full text-left px-4 py-2 flex items-center gap-2 hover:bg-[#2a2a2a] text-white"
+              >
                 <PersonOutlineIcon fontSize="small" /> Profil
               </button>
-              <button className="w-full text-left px-4 py-2 flex items-center gap-2 hover:bg-[#2a2a2a] text-white">
+              {/* <button className="w-full text-left px-4 py-2 flex items-center gap-2 hover:bg-[#2a2a2a] text-white">
                 <SettingsIcon fontSize="small" /> Ayarlar
-              </button>
+              </button> */}
               <div className="border-t border-[#333] my-1"></div>
               <button
                 onClick={handleLogout}

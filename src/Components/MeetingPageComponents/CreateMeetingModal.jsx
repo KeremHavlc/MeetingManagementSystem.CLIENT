@@ -1,12 +1,12 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-fox-toast";
 
 const CreateMeetingModal = ({ onClose }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [scheduledAt, setScheduledAt] = useState("");
-
   const navigate = useNavigate();
 
   const getUserIdFromToken = () => {
@@ -14,7 +14,7 @@ const CreateMeetingModal = ({ onClose }) => {
       const token = localStorage.getItem("token");
       if (!token) return null;
       const payload = JSON.parse(atob(token.split(".")[1]));
-      return payload["Id"];
+      return payload["Id"] || payload["id"] || payload["nameid"];
     } catch {
       return null;
     }
@@ -22,19 +22,13 @@ const CreateMeetingModal = ({ onClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const userId = getUserIdFromToken();
     if (!userId) {
-      alert("Kullanıcı bulunamadı!");
+      toast.error("Kullanıcı bulunamadı!");
       return;
     }
 
-    const data = {
-      title,
-      description,
-      scheduledAt,
-      createdByUserId: userId,
-    };
+    const data = { title, description, scheduledAt, createdByUserId: userId };
 
     try {
       const token = localStorage.getItem("token");
@@ -49,13 +43,23 @@ const CreateMeetingModal = ({ onClose }) => {
         }
       );
 
-      const meetingId = response.data.data;
+      if (!response.data.success) {
+        toast.error(response.data.message || "Toplantı oluşturulamadı!");
+        return;
+      }
 
+      const meetingId = response.data.data;
+      if (!meetingId) {
+        toast.error("Toplantı ID alınamadı!");
+        return;
+      }
+
+      toast.success("✅ Toplantı başarıyla oluşturuldu!");
       onClose();
       navigate(`/meetings/${meetingId}`);
     } catch (error) {
       console.error("Toplantı oluşturulamadı:", error);
-      alert("❌ Toplantı oluşturulurken hata oluştu");
+      toast.error("❌ Toplantı oluşturulurken hata oluştu!");
     }
   };
 
