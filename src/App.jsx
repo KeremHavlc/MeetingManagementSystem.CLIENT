@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
 import "./App.css";
 import LandingPage from "./Pages/LandingPage";
 import HomePage from "./Pages/HomePage";
@@ -13,12 +14,61 @@ import ProfilePage from "./Pages/ProfilePage";
 
 const AppWrapper = () => {
   const location = useLocation();
-
   const showSidebar = location.pathname !== "/";
 
+  // 📱 Mobil cihaz kontrolü
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 900);
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // 📵 Mobil engelleme ekranı
+  if (isMobile) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          backgroundColor: "#121212",
+          color: "white",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          textAlign: "center",
+          padding: "20px",
+        }}
+      >
+        <img
+          src="https://cdn-icons-png.flaticon.com/512/900/900834.png"
+          alt="Mobile under construction"
+          style={{ width: "80px", opacity: 0.9, marginBottom: "20px" }}
+        />
+        <h2 className="font-semibold text-2xl">
+          📱 Mobil sürüm geliştiriliyor
+        </h2>
+        <p className="text-gray-400 mt-3 text-base max-w-md">
+          Şu anda Meeting Management System sadece masaüstü cihazlarda
+          kullanılabilir.
+          <br />
+          Mobil uygulamamız aktif geliştirme aşamasında.
+          <br />
+          Yakında tüm platformlarda yayında olacak! 🚀
+        </p>
+      </div>
+    );
+  }
+
+  // 💻 Normal masaüstü görünümü
   return (
-    <div className="min-h-screen flex flex-col bg-[#121212] text-white">
-      <div className={`flex-1 ${showSidebar ? "pb-[100px]" : ""}`}>
+    <div className="min-h-screen flex flex-col bg-[#121212] text-white overflow-x-hidden">
+      <div className="flex-1 w-full max-w-screen-xl mx-auto px-4 sm:px-6 md:px-10 transition-all duration-300">
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/home" element={<HomePage />} />
