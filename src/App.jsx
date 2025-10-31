@@ -7,6 +7,7 @@ import { ToastContainer } from "react-fox-toast";
 import MeetingsPage from "./Pages/MeetingsPage";
 import MeetingDetailsPage from "./Pages/MeetingDetailsPage";
 import InviteJoinPage from "./Pages/InviteJoinPage";
+import DecisionPage from "./Pages/DecisionPage";
 
 const AppWrapper = () => {
   const location = useLocation();
@@ -22,6 +23,7 @@ const AppWrapper = () => {
           <Route path="/meetings" element={<MeetingsPage />} />
           <Route path="/meetings/:id" element={<MeetingDetailsPage />} />
           <Route path="/invite/:token" element={<InviteJoinPage />} />
+          <Route path="/decisions" element={<DecisionPage />} />
         </Routes>
       </div>
 
