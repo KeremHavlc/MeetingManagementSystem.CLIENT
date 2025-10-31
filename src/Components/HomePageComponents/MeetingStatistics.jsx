@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -21,24 +22,72 @@ ChartJS.register(
 
 const MeetingStatistics = () => {
   const [period, setPeriod] = useState("month");
+  const [chartData, setChartData] = useState({
+    labels: [],
+    datasets: [],
+  });
+  const [loading, setLoading] = useState(false);
 
-  // Örnek veri (backend bağlayınca burayı değiştireceğiz)
-  const chartData = {
-    labels: ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran"],
-    datasets: [
-      {
-        label: "Toplantı Sayısı",
-        data: [4, 5, 7, 6, 8, 10],
-        borderColor: "#E63946",
-        backgroundColor: "rgba(230,57,70,0.2)",
-        tension: 0.4,
-        fill: true,
-        pointBackgroundColor: "#E63946",
-        pointBorderColor: "#fff",
-        pointRadius: 5,
-      },
-    ],
+  const getUserIdFromToken = () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return null;
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      return payload["Id"] || payload["id"] || payload["nameid"] || null;
+    } catch (err) {
+      console.error("Token çözümlenemedi:", err);
+      return null;
+    }
   };
+
+  const fetchStatistics = async () => {
+    const userId = getUserIdFromToken();
+    if (!userId) return;
+
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("token");
+
+      const res = await axios.post(
+        "https://localhost:7270/api/Dashboard/GetMeetingStatistics",
+        { userId, period },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (res.data?.success && Array.isArray(res.data.data)) {
+        const labels = res.data.data.map((x) => x.label);
+        const counts = res.data.data.map((x) => x.count);
+
+        setChartData({
+          labels,
+          datasets: [
+            {
+              label: "Toplantı Sayısı",
+              data: counts,
+              borderColor: "#E63946",
+              backgroundColor: "rgba(230,57,70,0.2)",
+              tension: 0.4,
+              fill: true,
+              pointBackgroundColor: "#E63946",
+              pointBorderColor: "#fff",
+              pointRadius: 5,
+            },
+          ],
+        });
+      } else {
+        console.warn("Toplantı istatistikleri alınamadı:", res.data);
+        setChartData({ labels: [], datasets: [] });
+      }
+    } catch (err) {
+      console.error("İstatistik verisi alınırken hata:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchStatistics();
+  }, [period]);
 
   const chartOptions = {
     responsive: true,
@@ -70,25 +119,33 @@ const MeetingStatistics = () => {
       <h2 className="text-white font-semibold mb-4">Toplantı İstatistikleri</h2>
 
       <div className="bg-[#1a1a1a] p-4 rounded-xl border border-[#2e2e2e] h-[300px] flex flex-col">
-        {/* Üst Bilgi */}
         <div className="flex justify-between items-center mb-4">
           <p className="text-gray-400 text-sm">
-            Toplantı verilerine dayalı haftalık / aylık istatistikler
+            Toplantı verilerine dayalı haftalık / aylık / yıllık istatistikler
           </p>
           <select
             value={period}
             onChange={(e) => setPeriod(e.target.value)}
             className="bg-[#2a2a2a] text-white text-sm px-3 py-1 rounded-md border border-[#3a3a3a] focus:outline-none"
           >
-            <option value="month">Bu Ay</option>
             <option value="week">Bu Hafta</option>
+            <option value="month">Bu Ay</option>
             <option value="year">Bu Yıl</option>
           </select>
         </div>
 
-        {/* ✅ Grafik Alanı Artık Gerçek Grafik Oldu */}
         <div className="flex-1">
-          <Line data={chartData} options={chartOptions} />
+          {loading ? (
+            <p className="text-gray-400 text-center mt-20 animate-pulse">
+              Grafik yükleniyor...
+            </p>
+          ) : chartData.labels.length > 0 ? (
+            <Line data={chartData} options={chartOptions} />
+          ) : (
+            <p className="text-gray-500 text-center mt-20">
+              Bu dönem için toplantı bulunamadı.
+            </p>
+          )}
         </div>
       </div>
     </div>

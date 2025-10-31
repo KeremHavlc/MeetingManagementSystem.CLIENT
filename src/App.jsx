@@ -9,6 +9,7 @@ import MeetingDetailsPage from "./Pages/MeetingDetailsPage";
 import InviteJoinPage from "./Pages/InviteJoinPage";
 import DecisionPage from "./Pages/DecisionPage";
 import AssignmentPage from "./Pages/AssignmentPage";
+import ProfilePage from "./Pages/ProfilePage";
 
 const AppWrapper = () => {
   const location = useLocation();
@@ -26,6 +27,7 @@ const AppWrapper = () => {
           <Route path="/invite/:token" element={<InviteJoinPage />} />
           <Route path="/decisions" element={<DecisionPage />} />
           <Route path="/assignments" element={<AssignmentPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
         </Routes>
       </div>
 

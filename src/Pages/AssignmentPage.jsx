@@ -85,7 +85,7 @@ const AssignmentPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0D0D0D] text-white select-none font-inter">
+    <div className="min-h-screen bg-[#121212] text-white select-none font-inter">
       <AuthHeader />
 
       <div className="flex justify-center w-full mt-10 pb-20">
