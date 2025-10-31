@@ -173,7 +173,7 @@ const DecisionList = ({
                   assignments[d.id].map((a, idx) => (
                     <span
                       key={idx}
-                      className={`px-2 py-[2px] rounded-md border ${getStatusColor(
+                      className={`px-2 py-0.5 rounded-md border ${getStatusColor(
                         a.decisionStatusEnum
                       )}`}
                     >
