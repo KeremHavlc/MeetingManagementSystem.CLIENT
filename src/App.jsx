@@ -11,12 +11,20 @@ import InviteJoinPage from "./Pages/InviteJoinPage";
 import DecisionPage from "./Pages/DecisionPage";
 import AssignmentPage from "./Pages/AssignmentPage";
 import ProfilePage from "./Pages/ProfilePage";
+import ResetPasswordPage from "./Pages/ResetPasswordPage";
+import VerifyEmailPage from "./Pages/VerifyEmailPage";
 
 const AppWrapper = () => {
   const location = useLocation();
-  const showSidebar = location.pathname !== "/";
 
-  // 📱 Mobil cihaz kontrolü
+  const hideSidebarRoutes = [
+    "/",
+    "/reset-password",
+    "/forgot-password",
+    "/verify-email",
+  ];
+  const showSidebar = !hideSidebarRoutes.includes(location.pathname);
+
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -29,7 +37,6 @@ const AppWrapper = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // 📵 Mobil engelleme ekranı
   if (isMobile) {
     return (
       <div
@@ -65,7 +72,6 @@ const AppWrapper = () => {
     );
   }
 
-  // 💻 Normal masaüstü görünümü
   return (
     <div className="min-h-screen flex flex-col bg-[#121212] text-white overflow-x-hidden">
       <div className="flex-1 w-full max-w-screen-xl mx-auto px-4 sm:px-6 md:px-10 transition-all duration-300">
@@ -78,6 +84,8 @@ const AppWrapper = () => {
           <Route path="/decisions" element={<DecisionPage />} />
           <Route path="/assignments" element={<AssignmentPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/verify-email" element={<VerifyEmailPage />} />
         </Routes>
       </div>
 

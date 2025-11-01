@@ -35,7 +35,7 @@ const SideBar = () => {
       border-t border-[#2b2b2b]
       flex items-center justify-around
       shadow-[0_-4px_12px_rgba(0,0,0,0.4)]
-      rounded-t-2xl z-50"
+      rounded-t-2xl z-50 select-none"
     >
       {menuItems.map((item, index) => (
         <button

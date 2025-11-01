@@ -1,6 +1,7 @@
 import { useState } from "react";
 import api from "../../Api/AxiosClient";
 import { toast } from "react-fox-toast";
+
 const RegisterModal = ({ onClose }) => {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
@@ -8,9 +9,11 @@ const RegisterModal = ({ onClose }) => {
   const [lastName, setLastName] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage("");
+
     try {
       const response = await api.post("/AuthControllers/Register", {
         email,
@@ -19,16 +22,20 @@ const RegisterModal = ({ onClose }) => {
         lastName,
         password,
       });
-      console.log("Server cevabı:", response.data);
-      if (!response.data?.success) {
-        setErrorMessage(response.data?.message || "Kayıt Başarısız!");
+
+      const { success, message } = response.data;
+
+      if (!success) {
+        setErrorMessage(message || "Kayıt başarısız!");
         return;
       }
-      toast.success("Kayıt Başarılı!");
+
+      // 🔹 Başarılı kayıt
+      toast.success("Kayıt başarılı! Lütfen e-posta adresini doğrula.");
       onClose();
     } catch (error) {
       console.error("Kayıt Hatası:", error.response?.data || error.message);
-      setErrorMessage("Sunucuya bağlanırken bir hata oluştur!");
+      setErrorMessage("Sunucuya bağlanırken bir hata oluştu!");
     }
   };
 
@@ -51,6 +58,7 @@ const RegisterModal = ({ onClose }) => {
         <h2 className="text-2xl font-bold text-center mb-6 text-white">
           Üye Ol
         </h2>
+
         {errorMessage && (
           <p className="text-red-500 text-sm mb-2 text-center font-semibold">
             {errorMessage}
@@ -82,7 +90,6 @@ const RegisterModal = ({ onClose }) => {
             placeholder="Soyad"
             className="bg-[#2a2a2a] border border-gray-700 text-white rounded-lg px-4 py-2 focus:outline-none focus:border-[#e63946]"
           />
-
           <input
             onChange={(e) => setPassword(e.target.value)}
             type="password"
