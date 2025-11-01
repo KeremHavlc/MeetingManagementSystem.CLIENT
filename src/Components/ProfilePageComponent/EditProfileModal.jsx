@@ -54,8 +54,8 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }) => {
       setLoading(true);
       const token = localStorage.getItem("token");
 
-      const res = await axios.post(
-        "https://localhost:7270/api/User/UpdateUser",
+      const res = await axios.put(
+        `${import.meta.env.VITE_BASE_URL}/User/UpdateUser`,
         {
           userId,
           firstName: form.firstName,

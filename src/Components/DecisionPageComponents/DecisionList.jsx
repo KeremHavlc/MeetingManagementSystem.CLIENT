@@ -25,7 +25,6 @@ const DecisionList = ({
   const [userNames, setUserNames] = useState({});
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // 🔹 Kararlara ait assignment'ları çek
   useEffect(() => {
     const fetchAssignments = async () => {
       if (!decisions || decisions.length === 0) return;
@@ -36,7 +35,9 @@ const DecisionList = ({
       for (const d of decisions) {
         try {
           const res = await axios.post(
-            "https://localhost:7270/api/DecisionAssignment/GetDecisionAssignmentByDecisionId",
+            `${
+              import.meta.env.VITE_BASE_URL
+            }/DecisionAssignment/GetDecisionAssignmentByDecisionId`,
             { decisionId: d.id },
             {
               headers: {
@@ -62,7 +63,6 @@ const DecisionList = ({
     fetchAssignments();
   }, [decisions]);
 
-  // 🔹 Kullanıcı isimlerini çek
   useEffect(() => {
     const fetchUserNames = async () => {
       const token = localStorage.getItem("token");
@@ -79,7 +79,7 @@ const DecisionList = ({
         if (map[id]) continue;
         try {
           const res = await axios.post(
-            "https://localhost:7270/api/User/GetUserNameByUserId",
+            `${import.meta.env.VITE_BASE_URL}/User/GetUserNameByUserId`,
             { userId: id },
             {
               headers: {
@@ -110,7 +110,7 @@ const DecisionList = ({
 
   const handleModalClose = () => {
     setIsModalOpen(false);
-    refetchDecisions(selectedMeeting.id); // ✅ yeni karar eklendikten sonra kararları yenile
+    refetchDecisions(selectedMeeting.id);
   };
 
   return (
@@ -190,7 +190,6 @@ const DecisionList = ({
         </div>
       )}
 
-      {/* ✅ Modal */}
       <OpenDecisionModal
         isOpen={isModalOpen}
         onClose={handleModalClose}

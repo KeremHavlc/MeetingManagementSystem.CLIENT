@@ -10,9 +10,12 @@ const ForgotPasswordModal = ({ onClose }) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await api.post("/AuthControllers/ForgotPassword", {
-        userNameOrEmail,
-      });
+      const response = await api.post(
+        `${import.meta.env.VITE_BASE_URL}/AuthControllers/ForgotPassword`,
+        {
+          userNameOrEmail,
+        }
+      );
 
       if (response.data?.success) {
         toast.success("Şifre sıfırlama maili gönderildi!");

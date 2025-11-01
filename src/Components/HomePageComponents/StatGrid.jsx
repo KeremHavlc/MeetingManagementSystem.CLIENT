@@ -40,7 +40,7 @@ const StatGrid = () => {
         const token = localStorage.getItem("token");
 
         const res = await axios.post(
-          "https://localhost:7270/api/Dashboard/GetDashboardStats",
+          `${import.meta.env.VITE_BASE_URL}/Dashboard/GetDashboardStats`,
           { userId },
           {
             headers: { Authorization: `Bearer ${token}` },

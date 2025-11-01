@@ -6,10 +6,10 @@ import { toast } from "react-fox-toast";
 const InviteJoinPage = () => {
   const { token } = useParams();
   const navigate = useNavigate();
-  const hasRun = useRef(false); // ✅ useEffect'in 2 defa çalışmasını engellemek için
+  const hasRun = useRef(false);
 
   useEffect(() => {
-    if (hasRun.current) return; // ✅ Daha önce çalıştıysa tekrar çalıştırma
+    if (hasRun.current) return;
     hasRun.current = true;
 
     const joinMeeting = async () => {
@@ -21,20 +21,18 @@ const InviteJoinPage = () => {
       }
 
       try {
-        // Kullanıcı ID'yi JWT'den çek
         const payload = JSON.parse(atob(userToken.split(".")[1]));
         const userId = payload["Id"];
 
-        // Token’dan meetingId doğrula al
         const validateRes = await axios.post(
-          "https://localhost:7270/api/MeetingInvite/ValidateToken",
-          { token }
+          `${import.meta.env.VITE_BASE_URL}/MeetingInvite/ValidateToken`,
+          { token } // ✅ params yerine body
         );
+
         const meetingId = validateRes.data.meetingId;
 
-        // Toplantıya katıl
         await axios.post(
-          "https://localhost:7270/api/MeetingParticipant/JoinFromInvite",
+          `${import.meta.env.VITE_BASE_URL}/MeetingParticipant/JoinFromInvite`,
           { meetingId, userId },
           {
             headers: { Authorization: `Bearer ${userToken}` },

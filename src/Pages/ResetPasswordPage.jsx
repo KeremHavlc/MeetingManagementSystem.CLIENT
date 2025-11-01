@@ -13,22 +13,29 @@ const ResetPasswordPage = () => {
 
   const handleReset = async (e) => {
     e.preventDefault();
-    if (newPassword !== confirmPassword) return alert("Şifreler eşleşmiyor!");
+
+    if (newPassword !== confirmPassword) {
+      alert("Şifreler eşleşmiyor!");
+      return;
+    }
 
     try {
       setLoading(true);
       await axios.post(
-        "https://localhost:7270/api/AuthControllers/ChangePasswordUsinToken",
+        `${
+          import.meta.env.VITE_BASE_URL
+        }/AuthControllers/ChangePasswordUsinToken`,
         {
           email,
           newPassword,
           token,
         }
       );
+
       alert("Şifre başarıyla sıfırlandı!");
       navigate("/");
     } catch (err) {
-      console.error(err);
+      console.error("Şifre sıfırlama hatası:", err);
       alert("Şifre sıfırlanırken hata oluştu.");
     } finally {
       setLoading(false);

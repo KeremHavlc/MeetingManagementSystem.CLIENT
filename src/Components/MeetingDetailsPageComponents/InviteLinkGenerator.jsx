@@ -12,7 +12,7 @@ const InviteLinkGenerator = ({ meetingId, onParticipantAdded }) => {
       const token = localStorage.getItem("token");
 
       const res = await fetch(
-        "https://localhost:7270/api/MeetingInvite/CreateInviteLink",
+        `${import.meta.env.VITE_BASE_URL}/MeetingInvite/CreateInviteLink`,
         {
           method: "POST",
           headers: {

@@ -33,7 +33,7 @@ const CreateMeetingModal = ({ onClose }) => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        "https://localhost:7270/api/Meetings/CreateMeeting",
+        `${import.meta.env.VITE_BASE_URL}/Meetings/CreateMeeting`,
         data,
         {
           headers: {

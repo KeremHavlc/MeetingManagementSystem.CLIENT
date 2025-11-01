@@ -35,14 +35,12 @@ const DecisionPage = () => {
       try {
         setLoadingMeetings(true);
         const token = localStorage.getItem("token");
+
         const res = await axios.post(
-          "https://localhost:7270/api/Meetings/GetMeetingByUserId",
+          `${import.meta.env.VITE_BASE_URL}/Meetings/GetMeetingByUserId`,
           { userId },
           {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
+            headers: { Authorization: `Bearer ${token}` },
           }
         );
 
@@ -68,14 +66,12 @@ const DecisionPage = () => {
     try {
       setLoadingDecisions(true);
       const token = localStorage.getItem("token");
+
       const res = await axios.post(
-        "https://localhost:7270/api/Decision/GetDecisionByMeetingId",
+        `${import.meta.env.VITE_BASE_URL}/Decision/GetDecisionByMeetingId`,
         { meetingId },
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 

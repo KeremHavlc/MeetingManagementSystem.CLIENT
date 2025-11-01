@@ -25,9 +25,13 @@ const Participants = ({ onGenerateLink }) => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        "https://localhost:7270/api/MeetingParticipant/GetMeetingParticipantByMeetingId",
+        `${
+          import.meta.env.VITE_BASE_URL
+        }/MeetingParticipant/GetMeetingParticipantByMeetingId`,
         { meetingId },
-        { headers: { Authorization: `Bearer ${token}` } }
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
 
       if (response.data.success) {

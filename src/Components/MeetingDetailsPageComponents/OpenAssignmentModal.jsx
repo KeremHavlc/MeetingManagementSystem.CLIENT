@@ -2,10 +2,10 @@ import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 
 const STATUS_OPTIONS = [
-  { value: 0, label: "Beklemede" }, // Pending
-  { value: 1, label: "Devam Ediyor" }, // InProgress
-  { value: 2, label: "Tamamlandı" }, // Completed
-  { value: 3, label: "İptal Edildi" }, // Canceled
+  { value: 0, label: "Beklemede" },
+  { value: 1, label: "Devam Ediyor" },
+  { value: 2, label: "Tamamlandı" },
+  { value: 3, label: "İptal Edildi" },
 ];
 
 const OpenAssignmentModal = ({ isOpen, onClose, meetingId, decision }) => {
@@ -36,9 +36,13 @@ const OpenAssignmentModal = ({ isOpen, onClose, meetingId, decision }) => {
         setError("");
         const token = localStorage.getItem("token");
         const res = await axios.post(
-          "https://localhost:7270/api/MeetingParticipant/GetMeetingParticipantByMeetingId",
+          `${
+            import.meta.env.VITE_BASE_URL
+          }/MeetingParticipant/GetMeetingParticipantByMeetingId`,
           { meetingId },
-          { headers: token ? { Authorization: `Bearer ${token}` } : undefined }
+          {
+            headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+          }
         );
 
         if (res.data?.success) {
@@ -77,7 +81,9 @@ const OpenAssignmentModal = ({ isOpen, onClose, meetingId, decision }) => {
       setError("");
       const token = localStorage.getItem("token");
       const res = await axios.post(
-        "https://localhost:7270/api/DecisionAssignment/CreateDecisionAssignment",
+        `${
+          import.meta.env.VITE_BASE_URL
+        }/DecisionAssignment/CreateDecisionAssignment`,
         {
           decisionId,
           userId: assigneeId,

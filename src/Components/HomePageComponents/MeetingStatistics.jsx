@@ -49,9 +49,11 @@ const MeetingStatistics = () => {
       const token = localStorage.getItem("token");
 
       const res = await axios.post(
-        "https://localhost:7270/api/Dashboard/GetMeetingStatistics",
+        `${import.meta.env.VITE_BASE_URL}/Dashboard/GetMeetingStatistics`,
         { userId, period },
-        { headers: { Authorization: `Bearer ${token}` } }
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
 
       if (res.data?.success && Array.isArray(res.data.data)) {

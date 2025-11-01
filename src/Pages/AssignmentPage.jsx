@@ -29,9 +29,13 @@ const AssignmentPage = () => {
       }
 
       const res = await axios.post(
-        "https://localhost:7270/api/DecisionAssignment/GetDetailsDecisionByUserId",
+        `${
+          import.meta.env.VITE_BASE_URL
+        }/DecisionAssignment/GetDetailsDecisionByUserId`,
         { userId },
-        { headers: { Authorization: `Bearer ${token}` } }
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
 
       if (res.data?.success) {
@@ -64,8 +68,10 @@ const AssignmentPage = () => {
       const enumVal =
         newStatus === "Pending" ? 0 : newStatus === "InProgress" ? 1 : 2;
 
-      await axios.post(
-        "https://localhost:7270/api/DecisionAssignment/UpdateDecisionAssignmentStatus",
+      await axios.put(
+        `${
+          import.meta.env.VITE_BASE_URL
+        }/DecisionAssignment/UpdateDecisionAssignmentStatus`,
         {
           decisionAssignmentId: id,
           decisionStatusEnum: enumVal,

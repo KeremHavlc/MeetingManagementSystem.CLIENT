@@ -13,6 +13,7 @@ const ProfileInfo = () => {
     email: "",
   });
   const navigate = useNavigate();
+
   const getUserIdFromToken = () => {
     try {
       const token = localStorage.getItem("token");
@@ -38,11 +39,12 @@ const ProfileInfo = () => {
         const token = localStorage.getItem("token");
 
         const res = await axios.post(
-          "https://localhost:7270/api/User/GetUserInfo",
+          `${import.meta.env.VITE_BASE_URL}/User/GetUserInfo`,
           { userId },
           {
             headers: {
               Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
             },
           }
         );

@@ -40,8 +40,9 @@ const AddParticipantModal = ({ closeModal, onGenerateLink }) => {
     const token = localStorage.getItem("token");
 
     try {
+      // 🔹 Kullanıcı ID'yi çek
       const userRes = await fetch(
-        "https://localhost:7270/api/User/GetUserIdByUsernameOrEmail",
+        `${import.meta.env.VITE_BASE_URL}/User/GetUserIdByUsernameOrEmail`,
         {
           method: "POST",
           headers: {
@@ -69,7 +70,7 @@ const AddParticipantModal = ({ closeModal, onGenerateLink }) => {
         userJson.data.userId || userJson.data.id || userJson.data.user?.id;
 
       const joinRes = await fetch(
-        "https://localhost:7270/api/MeetingParticipant/JoinFromInvite",
+        `${import.meta.env.VITE_BASE_URL}/MeetingParticipant/JoinFromInvite`,
         {
           method: "POST",
           headers: {

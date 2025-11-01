@@ -15,7 +15,7 @@ const MeetingList = ({ meetings, selectedMeeting, onSelectMeeting }) => {
         if (!m.createdByUserId) continue;
         try {
           const res = await axios.post(
-            "https://localhost:7270/api/User/GetUserNameByUserId",
+            `${import.meta.env.VITE_BASE_URL}/User/GetUserNameByUserId`,
             { userId: m.createdByUserId },
             {
               headers: {

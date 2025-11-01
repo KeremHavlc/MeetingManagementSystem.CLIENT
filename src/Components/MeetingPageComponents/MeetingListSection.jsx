@@ -29,7 +29,9 @@ const MeetingListSection = ({ onMeetingsLoaded }) => {
       setLoading(true);
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        "https://localhost:7270/api/MeetingParticipant/GetMeetingParticipantsByUserId",
+        `${
+          import.meta.env.VITE_BASE_URL
+        }/MeetingParticipant/GetMeetingParticipantsByUserId`,
         { userId },
         {
           headers: { Authorization: `Bearer ${token}` },

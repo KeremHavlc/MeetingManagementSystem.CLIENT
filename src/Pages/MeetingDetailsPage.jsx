@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import * as signalR from "@microsoft/signalr";
+import axios from "axios";
+import { toast } from "react-fox-toast";
 
 import AuthHeader from "../Components/AuthHeader";
 import ChatSection from "../Components/MeetingDetailsPageComponents/ChatSection";
@@ -28,20 +30,13 @@ const formatName = (name) => {
 const fetchUserName = async (userId) => {
   try {
     const token = localStorage.getItem("token");
-    const res = await fetch(
-      "https://localhost:7270/api/User/GetUserNameByUserId",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ userId }),
-      }
+    const res = await axios.post(
+      `${import.meta.env.VITE_BASE_URL}/User/GetUserNameByUserId`,
+      { userId },
+      { headers: { Authorization: `Bearer ${token}` } }
     );
-    const data = await res.json();
-    if (data.success && data.data) {
-      return formatName(data.data.fullName || data.data.userName);
+    if (res.data.success && res.data.data) {
+      return formatName(res.data.data.fullName || res.data.data.userName);
     }
     return userId;
   } catch {
@@ -51,16 +46,13 @@ const fetchUserName = async (userId) => {
 
 const MeetingDetailsPage = () => {
   const { id: meetingId } = useParams();
-
   const [meetingDetails, setMeetingDetails] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [connection, setConnection] = useState(null);
   const [showParticipantsPanel, setShowParticipantsPanel] = useState(false);
-
   const [agendaItems, setAgendaItems] = useState([]);
   const [agendaProgress, setAgendaProgress] = useState(0);
-
   const [isDecisionOpen, setIsDecisionOpen] = useState(false);
   const [isAssignmentOpen, setIsAssignmentOpen] = useState(false);
   const [selectedDecision, setSelectedDecision] = useState(null);
@@ -68,23 +60,21 @@ const MeetingDetailsPage = () => {
   const currentUserId = getUserIdFromToken();
   const agendaRef = useRef();
 
+  // 📌 Meeting detaylarını çek
   useEffect(() => {
     if (!meetingId) return;
     const fetchMeetingDetails = async () => {
-      const token = localStorage.getItem("token");
-      const res = await fetch(
-        "https://localhost:7270/api/Meetings/GetMeetingById",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ meetingId }),
-        }
-      );
-      const result = await res.json();
-      if (result.success) setMeetingDetails(result.data);
+      try {
+        const token = localStorage.getItem("token");
+        const res = await axios.post(
+          `${import.meta.env.VITE_BASE_URL}/Meetings/GetMeetingById`,
+          { meetingId },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (res.data.success) setMeetingDetails(res.data.data);
+      } catch (err) {
+        console.error("Toplantı detayları alınamadı:", err);
+      }
     };
     fetchMeetingDetails();
   }, [meetingId]);
@@ -94,32 +84,38 @@ const MeetingDetailsPage = () => {
     const token = localStorage.getItem("token");
 
     const loadMessages = async () => {
-      const res = await fetch(
-        `https://localhost:7270/api/ChatMessages/by-meeting?meetingId=${meetingId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      const data = await res.json();
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_BASE_URL}/ChatMessages/by-meeting`,
+          {
+            params: { meetingId },
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        const data = res.data || [];
+        const mapped = await Promise.all(
+          data.map(async (msg) => {
+            const user =
+              msg.senderId === currentUserId
+                ? "Sen"
+                : await fetchUserName(msg.senderId);
 
-      const mapped = await Promise.all(
-        data.map(async (msg) => {
-          const user =
-            msg.senderId === currentUserId
-              ? "Sen"
-              : await fetchUserName(msg.senderId);
+            return {
+              id: msg.id,
+              user,
+              text: msg.message,
+              time: new Date(msg.createdAt).toLocaleTimeString("tr-TR", {
+                hour: "2-digit",
+                minute: "2-digit",
+              }),
+            };
+          })
+        );
 
-          return {
-            id: msg.id,
-            user,
-            text: msg.message,
-            time: new Date(msg.createdAt).toLocaleTimeString("tr-TR", {
-              hour: "2-digit",
-              minute: "2-digit",
-            }),
-          };
-        })
-      );
-
-      setMessages(mapped);
+        setMessages(mapped);
+      } catch (err) {
+        console.error("Mesajlar alınamadı:", err);
+      }
     };
 
     loadMessages();
@@ -129,7 +125,7 @@ const MeetingDetailsPage = () => {
     if (!meetingId) return;
 
     const connect = new signalR.HubConnectionBuilder()
-      .withUrl("https://localhost:7270/chatHub", {
+      .withUrl(`${import.meta.env.VITE_BASE_URL.replace("/api", "")}/chatHub`, {
         accessTokenFactory: () => localStorage.getItem("token") || "",
       })
       .withAutomaticReconnect()
@@ -180,9 +176,7 @@ const MeetingDetailsPage = () => {
     setNewMessage("");
   };
 
-  const openDecisionModal = () => {
-    setIsDecisionOpen(true);
-  };
+  const openDecisionModal = () => setIsDecisionOpen(true);
   const closeDecisionModal = () => {
     setIsDecisionOpen(false);
     agendaRef.current?.fetchDecisions();

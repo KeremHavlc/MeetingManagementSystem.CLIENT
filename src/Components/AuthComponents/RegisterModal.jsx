@@ -15,13 +15,16 @@ const RegisterModal = ({ onClose }) => {
     setErrorMessage("");
 
     try {
-      const response = await api.post("/AuthControllers/Register", {
-        email,
-        username,
-        firstName,
-        lastName,
-        password,
-      });
+      const response = await api.post(
+        `${import.meta.env.VITE_BASE_URL}/AuthControllers/Register`,
+        {
+          email,
+          username,
+          firstName,
+          lastName,
+          password,
+        }
+      );
 
       const { success, message } = response.data;
 
@@ -30,7 +33,6 @@ const RegisterModal = ({ onClose }) => {
         return;
       }
 
-      // 🔹 Başarılı kayıt
       toast.success("Kayıt başarılı! Lütfen e-posta adresini doğrula.");
       onClose();
     } catch (error) {

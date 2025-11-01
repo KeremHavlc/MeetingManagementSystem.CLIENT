@@ -27,7 +27,7 @@ const OpenDecisionModal = ({ isOpen, onClose, meetingId }) => {
       setError("");
       const token = localStorage.getItem("token");
       const res = await axios.post(
-        "https://localhost:7270/api/Decision/CreateDecision",
+        `${import.meta.env.VITE_BASE_URL}/Decision/CreateDecision`,
         {
           meetingId,
           title,

@@ -29,7 +29,7 @@ const NotificationPreferences = () => {
       try {
         setLoading(true);
         const res = await axios.post(
-          "https://localhost:7270/api/UserSettings/GetUserSettings",
+          `${import.meta.env.VITE_BASE_URL}/UserSettings/GetUserSettings`,
           { userId }
         );
 
@@ -57,8 +57,8 @@ const NotificationPreferences = () => {
     setNotifications(updated);
 
     try {
-      const res = await axios.post(
-        "https://localhost:7270/api/UserSettings/UpdateUserSettings",
+      const res = await axios.put(
+        `${import.meta.env.VITE_BASE_URL}/UserSettings/UpdateUserSettings`,
         {
           userId,
           receiveMeetingJoinNotifications: updated.meetingJoin,

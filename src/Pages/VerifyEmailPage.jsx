@@ -12,19 +12,21 @@ const VerifyEmailPage = () => {
     const verify = async () => {
       try {
         const res = await axios.post(
-          "https://localhost:7270/api/AuthControllers/ConfirmEmail",
+          `${import.meta.env.VITE_BASE_URL}/AuthControllers/ConfirmEmail`,
           { email, token }
         );
 
-        if (res.data.success)
+        if (res.data.success) {
           setStatus(
             "✅ E-posta başarıyla doğrulandı! Artık giriş yapabilirsin."
           );
-        else
+        } else {
           setStatus(
             "❌ Doğrulama başarısız. Token geçersiz veya süresi dolmuş olabilir."
           );
-      } catch {
+        }
+      } catch (err) {
+        console.error("E-posta doğrulama hatası:", err);
         setStatus("⚠️ Sunucu hatası oluştu.");
       }
     };

@@ -41,7 +41,7 @@ const AgendaSection = forwardRef(
         setDecisionsError("");
         const token = localStorage.getItem("token");
         const res = await axios.post(
-          "https://localhost:7270/api/Decision/GetDecisionByMeetingId",
+          `${import.meta.env.VITE_BASE_URL}/Decision/GetDecisionByMeetingId`,
           { meetingId },
           {
             headers: token ? { Authorization: `Bearer ${token}` } : undefined,
@@ -65,7 +65,9 @@ const AgendaSection = forwardRef(
       try {
         const token = localStorage.getItem("token");
         const res = await axios.post(
-          "https://localhost:7270/api/DecisionAssignment/GetMeetingDecisionProgress",
+          `${
+            import.meta.env.VITE_BASE_URL
+          }/DecisionAssignment/GetMeetingDecisionProgress`,
           { meetingId },
           {
             headers: token ? { Authorization: `Bearer ${token}` } : undefined,
@@ -178,7 +180,6 @@ const AgendaSection = forwardRef(
             </div>
           </div>
 
-          {/* 🔹 Kararlar listesi */}
           <div className="space-y-3 mt-3 max-h-[380px] overflow-y-auto pr-2">
             {loadingDecisions && (
               <p className="text-xs text-gray-400">Yükleniyor...</p>

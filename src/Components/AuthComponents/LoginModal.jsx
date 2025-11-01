@@ -18,14 +18,16 @@ const LoginModal = ({ onClose }) => {
     e.preventDefault();
 
     try {
-      const response = await api.post("/AuthControllers/SignIn", {
-        userNameOrEmail,
-        password,
-      });
+      const response = await api.post(
+        `${import.meta.env.VITE_BASE_URL}/AuthControllers/SignIn`,
+        {
+          userNameOrEmail,
+          password,
+        }
+      );
 
       const { success, message, data } = response.data;
 
-      // 🔹 Giriş başarısızsa detaylı mesaj göster
       if (!success) {
         if (message?.includes("doğrulanmamış"))
           toast.error(
@@ -35,7 +37,6 @@ const LoginModal = ({ onClose }) => {
         return;
       }
 
-      // 🔹 Başarılı giriş
       localStorage.setItem("token", data);
       toast.success("Giriş başarılı!");
       onClose();

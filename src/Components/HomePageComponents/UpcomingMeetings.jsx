@@ -33,9 +33,11 @@ const UpcomingMeetings = () => {
         const token = localStorage.getItem("token");
 
         const res = await axios.post(
-          "https://localhost:7270/api/Dashboard/GetUpcomingMeetings",
+          `${import.meta.env.VITE_BASE_URL}/Dashboard/GetUpcomingMeetings`,
           { userId },
-          { headers: { Authorization: `Bearer ${token}` } }
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
         );
 
         if (res.data?.success && Array.isArray(res.data.data)) {
