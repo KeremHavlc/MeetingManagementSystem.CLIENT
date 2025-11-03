@@ -15,6 +15,7 @@ import ResetPasswordPage from "./Pages/ResetPasswordPage";
 import VerifyEmailPage from "./Pages/VerifyEmailPage";
 import NotFoundPage from "./Pages/NotFoundPage";
 import GlobalLoader from "./Components/GlobalLoader";
+import ProtectedRoute from "./Components/ProtectedRoute";
 
 const validRoutes = [
   "/",
@@ -103,16 +104,39 @@ const AppWrapper = () => {
     <div className="min-h-screen flex flex-col bg-[#121212] text-white overflow-x-hidden">
       <div className="flex-1 w-full max-w-screen-xl mx-auto px-4 sm:px-6 md:px-10 transition-all duration-300">
         <Routes>
+          {/* Public routes */}
           <Route path="/" element={<LandingPage />} />
-          <Route path="/home" element={<HomePage />} />
-          <Route path="/meetings" element={<MeetingsPage />} />
-          <Route path="/meetings/:id" element={<MeetingDetailsPage />} />
-          <Route path="/invite/:token" element={<InviteJoinPage />} />
-          <Route path="/decisions" element={<DecisionPage />} />
-          <Route path="/assignments" element={<AssignmentPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/verify-email" element={<VerifyEmailPage />} />
+          <Route path="/invite/:token" element={<InviteJoinPage />} />
+
+          {/* Protected routes */}
+          <Route
+            path="/home"
+            element={<ProtectedRoute element={<HomePage />} />}
+          />
+          <Route
+            path="/meetings"
+            element={<ProtectedRoute element={<MeetingsPage />} />}
+          />
+          <Route
+            path="/meetings/:id"
+            element={<ProtectedRoute element={<MeetingDetailsPage />} />}
+          />
+          <Route
+            path="/decisions"
+            element={<ProtectedRoute element={<DecisionPage />} />}
+          />
+          <Route
+            path="/assignments"
+            element={<ProtectedRoute element={<AssignmentPage />} />}
+          />
+          <Route
+            path="/profile"
+            element={<ProtectedRoute element={<ProfilePage />} />}
+          />
+
+          {/* NotFound */}
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </div>
