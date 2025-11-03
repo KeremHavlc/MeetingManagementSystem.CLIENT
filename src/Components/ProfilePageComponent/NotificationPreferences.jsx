@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
 import axios from "axios";
+import React, { useState, useEffect } from "react";
 import { toast } from "react-fox-toast";
 
 const NotificationPreferences = () => {
@@ -21,16 +21,22 @@ const NotificationPreferences = () => {
   };
 
   const userId = getUserIdFromToken();
+  const token = localStorage.getItem("token");
 
   // Kullanıcı ayarlarını getir
   useEffect(() => {
     const fetchSettings = async () => {
-      if (!userId) return;
+      if (!userId || !token) return;
       try {
         setLoading(true);
         const res = await axios.post(
           `${import.meta.env.VITE_BASE_URL}/UserSettings/GetUserSettings`,
-          { userId }
+          { userId },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
 
         if (res.data.success && res.data.data) {
@@ -50,7 +56,7 @@ const NotificationPreferences = () => {
     };
 
     fetchSettings();
-  }, [userId]);
+  }, [userId, token]);
 
   const handleToggle = async (key) => {
     const updated = { ...notifications, [key]: !notifications[key] };
@@ -63,6 +69,11 @@ const NotificationPreferences = () => {
           userId,
           receiveMeetingJoinNotifications: updated.meetingJoin,
           receiveDecisionNotifications: updated.decision,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
 

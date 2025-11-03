@@ -13,6 +13,21 @@ import AssignmentPage from "./Pages/AssignmentPage";
 import ProfilePage from "./Pages/ProfilePage";
 import ResetPasswordPage from "./Pages/ResetPasswordPage";
 import VerifyEmailPage from "./Pages/VerifyEmailPage";
+import NotFoundPage from "./Pages/NotFoundPage";
+import GlobalLoader from "./Components/GlobalLoader";
+
+const validRoutes = [
+  "/",
+  "/home",
+  "/meetings",
+  "/meetings/:id",
+  "/invite/:token",
+  "/decisions",
+  "/assignments",
+  "/profile",
+  "/reset-password",
+  "/verify-email",
+];
 
 const AppWrapper = () => {
   const location = useLocation();
@@ -23,7 +38,19 @@ const AppWrapper = () => {
     "/forgot-password",
     "/verify-email",
   ];
-  const showSidebar = !hideSidebarRoutes.includes(location.pathname);
+
+  const isValidRoute = validRoutes.some((route) => {
+    if (route.includes(":")) {
+      const routePattern = new RegExp(
+        "^" + route.replace(/:[^/]+/g, "[^/]+") + "$"
+      );
+      return routePattern.test(location.pathname);
+    }
+    return route === location.pathname;
+  });
+
+  const showSidebar =
+    !hideSidebarRoutes.includes(location.pathname) && isValidRoute;
 
   const [isMobile, setIsMobile] = useState(false);
 
@@ -86,6 +113,7 @@ const AppWrapper = () => {
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/verify-email" element={<VerifyEmailPage />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </div>
 
@@ -129,6 +157,7 @@ const AppWrapper = () => {
 function App() {
   return (
     <BrowserRouter>
+      <GlobalLoader />
       <AppWrapper />
     </BrowserRouter>
   );
