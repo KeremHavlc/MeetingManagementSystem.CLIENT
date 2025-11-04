@@ -26,7 +26,7 @@ const InviteJoinPage = () => {
 
         const validateRes = await axios.post(
           `${import.meta.env.VITE_BASE_URL}/MeetingInvite/ValidateToken`,
-          { token } // ✅ params yerine body
+          { token }
         );
 
         const meetingId = validateRes.data.meetingId;

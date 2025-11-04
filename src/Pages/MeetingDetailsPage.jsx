@@ -122,7 +122,7 @@ const MeetingDetailsPage = () => {
   }, [meetingId]);
 
   useEffect(() => {
-    if (!meetingId) return;
+    if (!meetingId || connection) return;
 
     const connect = new signalR.HubConnectionBuilder()
       .withUrl(`${import.meta.env.VITE_BASE_URL.replace("/api", "")}/chatHub`, {

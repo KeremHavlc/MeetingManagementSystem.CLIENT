@@ -1,7 +1,6 @@
 import React from "react";
 import Groups2Icon from "@mui/icons-material/Groups2";
 import GitHubIcon from "@mui/icons-material/GitHub";
-import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import EmailIcon from "@mui/icons-material/Email";
 
 const Footer = () => {
@@ -24,13 +23,18 @@ const Footer = () => {
 
         {/* Sağ - Sosyal Medya */}
         <div className="flex gap-4 text-gray-400">
-          <a href="#" className="hover:text-[#e63946] transition-colors">
+          <a
+            href="https://github.com/KeremHavlc"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-[#e63946] transition-colors"
+          >
             <GitHubIcon />
           </a>
-          <a href="#" className="hover:text-[#e63946] transition-colors">
-            <LinkedInIcon />
-          </a>
-          <a href="#" className="hover:text-[#e63946] transition-colors">
+          <a
+            href="mailto:keremhvlc@gmail.com"
+            className="hover:text-[#e63946] transition-colors"
+          >
             <EmailIcon />
           </a>
         </div>

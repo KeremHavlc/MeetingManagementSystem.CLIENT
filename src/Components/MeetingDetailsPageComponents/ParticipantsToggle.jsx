@@ -21,7 +21,10 @@ const ParticipantsToggle = ({ onToggle }) => {
       );
 
       if (response.data.success) {
-        setParticipants(response.data.data);
+        const newList = response.data.data;
+        if (JSON.stringify(newList) !== JSON.stringify(participants)) {
+          setParticipants(newList);
+        }
       }
     } catch (error) {
       console.error("Katılımcılar alınırken hata:", error);
@@ -30,7 +33,7 @@ const ParticipantsToggle = ({ onToggle }) => {
 
   useEffect(() => {
     fetchParticipants();
-    const interval = setInterval(fetchParticipants, 5000);
+    const interval = setInterval(fetchParticipants, 15000);
     return () => clearInterval(interval);
   }, [meetingId]);
 

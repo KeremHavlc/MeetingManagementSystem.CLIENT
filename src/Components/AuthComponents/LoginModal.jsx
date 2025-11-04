@@ -8,6 +8,7 @@ const LoginModal = ({ onClose }) => {
   const [userNameOrEmail, setUserNameOrEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isForgotOpen, setIsForgotOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -16,6 +17,7 @@ const LoginModal = ({ onClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     try {
       const response = await api.post(
@@ -33,7 +35,7 @@ const LoginModal = ({ onClose }) => {
           toast.error(
             "E-posta adresin doğrulanmamış! Yeni doğrulama maili gönderildi."
           );
-        else toast.error(message || "Giriş başarısız!");
+        else toast.error("Kullanıcı adı veya şifre hatalı!");
         return;
       }
 
@@ -44,6 +46,8 @@ const LoginModal = ({ onClose }) => {
     } catch (error) {
       console.error("Login Error:", error);
       toast.error("Sunucuya bağlanılamadı!");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -84,9 +88,12 @@ const LoginModal = ({ onClose }) => {
 
             <button
               type="submit"
-              className="bg-[#e63946] text-white py-2 rounded-lg hover:bg-[#b82e38] transition"
+              disabled={loading}
+              className={`${
+                loading ? "bg-[#b82e38] cursor-not-allowed" : "bg-[#e63946]"
+              } text-white py-2 rounded-lg hover:bg-[#b82e38] transition`}
             >
-              Giriş Yap
+              {loading ? "Giriş Yapılıyor..." : "Giriş Yap"}
             </button>
           </form>
 
@@ -98,6 +105,29 @@ const LoginModal = ({ onClose }) => {
           </p>
         </div>
       </div>
+
+      {loading && (
+        <div className="fixed inset-0 flex flex-col items-center justify-center bg-black/70 backdrop-blur-sm z-[9999] animate-fadeIn">
+          <div className="w-10 h-10 border-4 border-t-transparent border-white rounded-full animate-spin mb-4"></div>
+          <h1 className="text-white text-lg font-semibold tracking-wide animate-pulse">
+            Giriş yapılıyor...
+          </h1>
+
+          <style jsx>{`
+            @keyframes fadeIn {
+              from {
+                opacity: 0;
+              }
+              to {
+                opacity: 1;
+              }
+            }
+            .animate-fadeIn {
+              animation: fadeIn 0.3s ease-in-out;
+            }
+          `}</style>
+        </div>
+      )}
 
       {isForgotOpen && (
         <ForgotPasswordModal onClose={() => setIsForgotOpen(false)} />

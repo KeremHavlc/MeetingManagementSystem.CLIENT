@@ -1,28 +1,52 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../Api/AxiosClient"; // axios değil, bizim oluşturduğumuz instance!
 
 const GlobalLoader = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const reqInterceptor = axios.interceptors.request.use((config) => {
-      setLoading(true);
+    const skipEndpoints = [
+      "/MeetingParticipant/GetMeetingParticipantByMeetingId",
+      "/ChatMessages/by-meeting",
+    ];
+
+    // Request interceptor
+    const reqInterceptor = api.interceptors.request.use((config) => {
+      const shouldSkip = skipEndpoints.some((endpoint) =>
+        config.url?.includes(endpoint)
+      );
+      if (!shouldSkip) {
+        setLoading(true);
+      }
       return config;
     });
-    const resInterceptor = axios.interceptors.response.use(
+
+    // Response interceptor
+    const resInterceptor = api.interceptors.response.use(
       (response) => {
-        setLoading(false);
+        const shouldSkip = skipEndpoints.some((endpoint) =>
+          response.config.url?.includes(endpoint)
+        );
+        if (!shouldSkip) {
+          setLoading(false);
+        }
         return response;
       },
       (error) => {
-        setLoading(false);
+        const shouldSkip = skipEndpoints.some((endpoint) =>
+          error.config?.url?.includes(endpoint)
+        );
+        if (!shouldSkip) {
+          setLoading(false);
+        }
         return Promise.reject(error);
       }
     );
 
+    // Cleanup
     return () => {
-      axios.interceptors.request.eject(reqInterceptor);
-      axios.interceptors.response.eject(resInterceptor);
+      api.interceptors.request.eject(reqInterceptor);
+      api.interceptors.response.eject(resInterceptor);
     };
   }, []);
 
