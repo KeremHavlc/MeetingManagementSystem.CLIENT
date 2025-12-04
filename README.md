@@ -1,16 +1,49 @@
-# React + Vite
+# Meeting Management System (Client)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 🌐 Live Demo
+Experience the application live: [meets.com.tr](https://meets.com.tr)
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+##  Overview
+This repository has the **client part** (user interface) for the Meeting Management System. It is a simple website that helps you **plan, follow, and manage** your meetings, people who attend, and meeting rooms in your company.
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+##  Built With
+The client is developed using a modern, scalable web stack built around React.
 
-## Expanding the ESLint configuration
+* **React** (Primary JavaScript Library)
+* **Modern CSS/UI Framework** (e.g., Styled Components, Tailwind CSS, or Material-UI)
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+*For a complete and accurate list of dependencies and versions, please check the `package.json` file.*
+
+---
+
+##  Backend API
+This front-end application communicates with a dedicated backend service for all data operations and business logic. The source code for the API is available here:
+
+[Meeting Management System (API) Repository](https://github.com/KeremHavlc/MeetingManagementSystem.API)
+
+---
+
+##  Getting Started
+
+### Prerequisites
+* Node.js & npm (LTS version recommended)
+
+### Installation
+
+1.  Clone the repository:
+    ```bash
+    git clone [https://github.com/KeremHavlc/MeetingManagementSystem.CLIENT.git](https://github.com/KeremHavlc/MeetingManagementSystem.CLIENT.git)
+    ```
+2.  Install dependencies:
+    ```bash
+    npm install
+    ```
+3.  Run the application locally:
+    ```bash
+    npm start 
+    
+    ```
